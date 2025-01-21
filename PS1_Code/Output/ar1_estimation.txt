@@ -1,0 +1,6 @@
+AR(1) Estimation Results:
+
+Key: ar_tau
+Estimates:
+[[0.3664486 ]
+ [0.89849785]]
