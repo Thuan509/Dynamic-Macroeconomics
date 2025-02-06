@@ -33,41 +33,36 @@ def rouwenhorst_ar1(N, mu, rho, sigma):
         P2 : Transition probability matrix.
     """
     
-    # Step 1: Construct state vector
-    # Calculate unconditional mean and standard deviation
-    unconditional_mean = mu / (1 - rho)
-    unconditional_std = sigma / np.sqrt(1 - rho**2)
+    # Step 1: Calculate parameters
+    p = (1 + rho) / 2
+    q = p
     
-    # Create equally spaced grid
-    state_min = unconditional_mean - np.sqrt(N-1) * unconditional_std
-    state_max = unconditional_mean + np.sqrt(N-1) * unconditional_std
-    states = linspace(state_min, state_max, N)
+    # Step 2: Create state vector
+    y_mean = mu / (1 - rho)  # unconditional mean
+    y_std = sigma / np.sqrt(1 - rho**2)  # unconditional standard deviation
     
-    # Step 2: Set up initial transition matrix (2x2)
-    p = q = (1 + rho) / 2
-    P2 = np.array([[p, 1-p],
-                [1-q, q]])
+    state_min = y_mean - np.sqrt(N-1) * y_std
+    state_max = y_mean + np.sqrt(N-1) * y_std
+    states = np.linspace(state_min, state_max, N)
     
-    if N == 2:
-        return states, P2
+    # Step 3: Build transition matrix recursively
+    # Start with 2x2 matrix
+    P = np.array([[p, 1-p], [1-q, q]])
     
-    # Step 3: Recursive construction of transition matrices
+    # Expand to NxN
     for n in range(3, N+1):
-        P_prev = P2
-        P = zeros((n, n))
+        P_old = P
+        P = np.zeros((n, n))
         
-        # Construct using the recursive formula
-        P[:-1,:-1] += p * P_prev
-        P[:-1,1:] += (1-p) * P_prev
-        P[1:,:-1] += (1-q) * P_prev
-        P[1:,1:] += q * P_prev
+        # Fill new transition matrix
+        P[:-1,:-1] += p * P_old
+        P[:-1,1:] += (1-p) * P_old
+        P[1:,:-1] += (1-q) * P_old
+        P[1:,1:] += q * P_old
         
         # Scale rows (except first and last)
         P[1:-1,:] /= 2
-        
-        P2 = P
-    
-    return states, P2
+        return states, P
 
 # Parameters
 N = 7
@@ -76,12 +71,12 @@ rho = 0.85
 sigma = 1
 
 # N, mu, rho, sigma
-states, P2 = rouwenhorst_ar1(N, mu, rho, sigma)
+states, P = rouwenhorst_ar1(N, mu, rho, sigma)
 # Print the results
 print("Grid points (states):")
 print(states)
 print("\nTransition probability matrix (P2):")
-print(P2) 
+print(P) 
 
 ## Define the output folder and file
 output_folder = "Output"
@@ -94,12 +89,12 @@ os.makedirs(output_folder, exist_ok=True)
 with open(output_file, "w") as file:
     file.write("Grid Points (states):\n")
     file.write(str(states) + "\n\n")
-    file.write("Transition Probability Matrix (P2):\n")
-    for row in P2:
+    file.write("Transition Probability Matrix (P):\n")
+    for row in P:
         file.write(" ".join(f"{val:.6f}" for val in row) + "\n")
 
 print("Grid points (states):")
 print(states)
-print("\nTransition probability matrix (P2):")
-print(P2)
+print("\nTransition probability matrix (P):")
+print(P)
 print(f"Results saved to {output_file}")
