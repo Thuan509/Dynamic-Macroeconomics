@@ -40,7 +40,6 @@ def rouwenhorst_ar1(N, mu, rho, sigma):
     # Step 2: Create state vector
     y_mean = mu / (1 - rho)  # unconditional mean
     y_std = sigma / np.sqrt(1 - rho**2)  # unconditional standard deviation
-    
     state_min = y_mean - np.sqrt(N-1) * y_std
     state_max = y_mean + np.sqrt(N-1) * y_std
     states = np.linspace(state_min, state_max, N) # Define the grid
