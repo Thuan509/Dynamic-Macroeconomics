@@ -29,8 +29,8 @@ def rouwenhorst_ar1(N, mu, rho, sigma):
         m     : Parameter such that m time the unconditional std. dev. of the AR(1) is equal to the largest grid point.
         
     Output:
-        states    : Grid for the AR(1) process.
-        P2 : Transition probability matrix.
+        states : Grid for the AR(1) process.
+        P      : Transition probability matrix.
     """
     
     # Step 1: Calculate parameters
@@ -43,26 +43,23 @@ def rouwenhorst_ar1(N, mu, rho, sigma):
     
     state_min = y_mean - np.sqrt(N-1) * y_std
     state_max = y_mean + np.sqrt(N-1) * y_std
-    states = np.linspace(state_min, state_max, N)
+    states = np.linspace(state_min, state_max, N) # Define the grid
     
-    # Step 3: Build transition matrix recursively
-    # Start with 2x2 matrix
-    P = np.array([[p, 1-p], [1-q, q]])
-    
-    # Expand to NxN
-    for n in range(3, N+1):
-        P_old = P
-        P = np.zeros((n, n))
-        
-        # Fill new transition matrix
-        P[:-1,:-1] += p * P_old
-        P[:-1,1:] += (1-p) * P_old
-        P[1:,:-1] += (1-q) * P_old
-        P[1:,1:] += q * P_old
-        
-        # Scale rows (except first and last)
-        P[1:-1,:] /= 2
-        return states, P
+    if N == 1:
+        return np.array([0.0]), np.array([[1.0]])
+
+    mat = np.array([[p, 1 - p], [1 - q, q]])  # Base case (N=2)
+
+    for n in range(3, N + 1):
+        new_mat = np.zeros((n, n))
+        new_mat[:-1, :-1] += p * mat
+        new_mat[:-1, 1:] += (1 - p) * mat
+        new_mat[1:, :-1] += (1 - q) * mat
+        new_mat[1:, 1:] += q * mat
+        new_mat[1:-1, :] /= 2
+        mat = new_mat
+
+    return states, mat
 
 # Parameters
 N = 7
@@ -73,10 +70,13 @@ sigma = 1
 # N, mu, rho, sigma
 states, P = rouwenhorst_ar1(N, mu, rho, sigma)
 # Print the results
+print("The shape of the state vector:", states.shape)
 print("Grid points (states):")
 print(states)
-print("\nTransition probability matrix (P2):")
+print("The shape of the transition probability matrix:", P.shape)
+print("\nTransition probability matrix (P):")
 print(P) 
+
 
 ## Define the output folder and file
 output_folder = "Output"
@@ -87,14 +87,22 @@ os.makedirs(output_folder, exist_ok=True)
 
 # Save the results to a text file
 with open(output_file, "w") as file:
+    file.write(f"Shape of the state vector: {states.shape}\n")
     file.write("Grid Points (states):\n")
     file.write(str(states) + "\n\n")
+
+    file.write(f"Shape of the transition probability matrix: {P.shape}\n")
     file.write("Transition Probability Matrix (P):\n")
     for row in P:
         file.write(" ".join(f"{val:.6f}" for val in row) + "\n")
 
-print("Grid points (states):")
+# Print results
+print(f"Shape of the state vector: {states.shape}")
+print("Grid Points (states):")
 print(states)
-print("\nTransition probability matrix (P):")
+
+print(f"\nShape of the transition probability matrix: {P.shape}")
+print("Transition Probability Matrix (P):")
 print(P)
-print(f"Results saved to {output_file}")
+
+print(f"\nResults saved to {output_file}")
