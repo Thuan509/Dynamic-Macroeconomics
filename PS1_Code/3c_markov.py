@@ -1,140 +1,104 @@
 """
 
-3c_markov.py
+markov.py
 -------
 
-This code call the functions needed to simulate and plot the Markov Chain for the AR(1) process.
+This code simulate and plot the Markov Chain for the AR(1) process.
 
 
 """
-
-#%%
 import os
-import gc
-gc.set_threshold(1,1,1)
-
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-# 
-import functions
-from functions import tauchen_ar1,simulate
 
-#%%
-
-"""
-
-                            Discretize AR(1).
-
-"""
-
-mu    = 0.50000                                                                 # Intercept.
-rho   = 0.85000                                                                 # Persistence.
-sigma = 1.00000                                                                 # Std. dev. of error term.
-N     = 7                                                                       # Number of grid points.
-m     = 3                                                                       # For Tauchen (1986).
-
-ar    = {'tau': tauchen_ar1} 
-ar_y  = {}
-ar_pi = {}
-
-for i in ar:
-    if i != "tau":
-        ar_y[i], ar_pi[i] = ar[i](mu,rho,sigma,N)
-    else:
-        ar_y[i], ar_pi[i] = ar[i](mu,rho,sigma,N,m)
-        
-del mu,rho,sigma,N,m
-gc.collect()
-
-#%%
-
-"""
-
-      Simulate the AR(1)'s based on discretized processes.
-
-"""
-
-seed = 2025
-T = 50
-
-sim = {}
-
-for i in ar_y.keys():
-    np.random.seed(seed)
-    sim["ar_"+i] = simulate(ar_y[i],ar_pi[i],T)
+# Rouwenhorst method for discretizing AR(1)
+def rouwenhorst_ar1(mu, rho, sigma, N):
+    """
+    Discretizes an AR(1) process using Rouwenhorst's method.
     
-del seed
-gc.collect()
+    Parameters:
+        mu    : Intercept
+        rho   : Persistence of AR(1)
+        sigma : Standard deviation of shocks
+        N     : Number of states
+    
+    Returns:
+        states : Grid for AR(1) process
+        P      : Transition probability matrix
+    """
+    p = (1 + rho) / 2
+    q = p
 
-#%%
+    # Define state space
+    y_mean = mu / (1 - rho)  # Unconditional mean
+    y_std = sigma / np.sqrt(1 - rho**2)  # Unconditional standard deviation
+    state_min = y_mean - np.sqrt(N-1) * y_std
+    state_max = y_mean + np.sqrt(N-1) * y_std
+    states = np.linspace(state_min, state_max, N)
 
-"""
+    if N == 1:
+        return np.array([0.0]), np.array([[1.0]])
 
-    Plot series.
+    # Transition matrix using Rouwenhorst's method
+    mat = np.array([[p, 1 - p], [1 - q, q]])  # Base case (N=2)
+    for n in range(3, N + 1):
+        new_mat = np.zeros((n, n))
+        new_mat[:-1, :-1] += p * mat
+        new_mat[:-1, 1:] += (1 - p) * mat
+        new_mat[1:, :-1] += (1 - q) * mat
+        new_mat[1:, 1:] += q * mat
+        new_mat[1:-1, :] /= 2
+        mat = new_mat
 
-"""
-# Ensure the output folder exists
+    return states, mat
+
+# Parameters
+mu = 0.5       # Intercept
+rho = 0.85     # Persistence
+sigma = 1      # Standard deviation of shocks
+N = 7          # Number of states
+T = 50         # Simulation length
+
+# Generate state space and transition matrix
+states, P = rouwenhorst_ar1(mu, rho, sigma, N)
+
+# Set seed for reproducibility
+np.random.seed(2025)
+
+# Draw initial state uniformly from the state vector
+initial_state_idx = np.random.choice(range(N))  # Uniformly select index
+mc = [states[initial_state_idx]]
+
+# Simulate Markov Chain
+current_state_idx = initial_state_idx
+
+for t in range(1, T):
+    u = np.random.uniform(0, 1)  # Draw from uniform [0,1]
+    cumulative_probs = np.cumsum(P[current_state_idx])  # CDF of transition row
+
+    # Determine the next state based on cumulative probabilities
+    next_state_idx = np.where(u <= cumulative_probs)[0][0]
+
+    mc.append(states[next_state_idx])
+    current_state_idx = next_state_idx
+
+# Convert to NumPy array for plotting
+mc = np.array(mc)
+
+# Plot the Markov Chain simulation
+plt.figure(figsize=(10, 5))
+plt.step(range(T), mc, linestyle="-", color="b")
+plt.xlabel("Time Period")
+plt.ylabel("State")
+plt.title("Simulated Markov Chain (50 periods)")
+plt.grid(True)
+
+# Save plot
 output_folder = "Output"
 os.makedirs(output_folder, exist_ok=True)
+plot_path = os.path.join(output_folder, "markov_chain_simulation.png")
+plt.savefig(plot_path)
+plt.show()
 
-time = range(0,T)
-
-for i in sim:
-    
-    if sim[i].shape[0] == 1:
-        
-        plt.figure()
-        plt.plot(time,np.squeeze(sim[i]))
-        plt.xlabel('Time')
-        plt.ylabel('Y')    
-        plt.title("AR(1): "+i)
-        plot_path = os.path.join(output_folder, f"{i}_plot.png")
-        plt.savefig(plot_path)
-        plt.show()
-
-del i
-gc.collect()
-
-#%%
-
-"""
-
-                    Estimate the AR(1) series using simulated data.
-
-"""
-
-# Path for the AR(1) estimation output file
-ar1_estimation_file = os.path.join(output_folder, "ar1_estimation.txt")
-
-# Estimate the AR(1) series using simulated data
-big1 = np.ones((T-1, 1))
-bhat = {}
-
-for i in sim:
-    if sim[i].shape[0] == 1:
-        y = np.expand_dims(sim[i][0, 1:T], axis=1)
-        x = np.expand_dims(sim[i][0, 0:T-1], axis=1)
-        bigX = np.concatenate((big1, x), axis=1)
-
-        bhat[i] = np.linalg.inv(bigX.T @ bigX) @ bigX.T @ y
-
-    else:
-        y = sim[i][:, 1:T].T
-        x = sim[i][:, 0:T-1].T
-        bigX = np.concatenate((big1, x), axis=1)
-
-        bhat[i] = (np.linalg.inv(bigX.T @ bigX) @ bigX.T @ y).T
-
-# Save the results to a text file
-with open(ar1_estimation_file, "w") as file:
-    file.write("AR(1) Estimation Results:\n")
-    for key, value in bhat.items():
-        file.write(f"\nKey: {key}\n")
-        file.write(f"Estimates:\n{value}\n")
-
-print(f"AR(1) estimation results saved to {ar1_estimation_file}")
-
-# Clean up variables
-del i, T, ar, x, y, big1, bigX
-gc.collect()
+print(f"Simulation completed. Plot saved at {plot_path}")

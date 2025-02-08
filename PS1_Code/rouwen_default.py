@@ -1,3 +1,13 @@
+"""
+
+2b_1_rouwen_default.py
+----------
+
+This code discretizes a Markov process into N states using the Rouwenhorst's Method with quantecon package to verify the manual function
+
+
+"""
+
 import numpy as np
 import quantecon as qe
 
