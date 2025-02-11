@@ -1,62 +1,110 @@
+"""
+Question 3d
+multi_markov.py
+-------
+
+This code simulate and plot the Markov Chain for the AR(1) process for different gamma values
+
+
+"""
+
+import os
 import numpy as np
-from numpy.random import uniform
-import random
+import quantecon as qe
+import matplotlib.pyplot as plt
 
-def simulate_markov_chain(P, states, T, initial_state_idx):
+# Rouwenhorst method for discretizing AR(1)
+def rouwenhorst_ar1(mu, rho, sigma, N):
     """
-    Simulate Markov chain for T periods
-    P: transition matrix
-    states: state vector
-    T: number of periods
-    initial_state_idx: index of initial state
+    Discretizes an AR(1) process using Rouwenhorst's method.
+    
+    Parameters:
+        mu    : Intercept
+        rho   : Persistence of AR(1)
+        sigma : Standard deviation of shocks
+        N     : Number of states
+    
+    Returns:
+        states : Grid for AR(1) process
+        P      : Transition probability matrix
     """
-    path = np.zeros(T)
-    current_state = initial_state_idx
-    
-    for t in range(T):
-        path[t] = states[current_state]
-        # Draw next state using transition probabilities
-        current_state = np.random.choice(len(states), p=P[current_state])
-    
-    return path
+    p = (1 + rho) / 2
+    q = p
 
-# Set seed
-np.random.seed(2025)
-random.seed(2025)
+    # Define state space
+    y_mean = mu / (1 - rho)  # Unconditional mean
+    y_std = sigma / np.sqrt(1 - rho**2)  # Unconditional standard deviation
+    state_min = y_mean - np.sqrt(N-1) * y_std
+    state_max = y_mean + np.sqrt(N-1) * y_std
+    states = np.linspace(state_min, state_max, N)
+
+    if N == 1:
+        return np.array([0.0]), np.array([[1.0]])
+
+    # Transition matrix using Rouwenhorst's method
+    mat = np.array([[p, 1 - p], [1 - q, q]])  # Base case (N=2)
+    for n in range(3, N + 1):
+        new_mat = np.zeros((n, n))
+        new_mat[:-1, :-1] += p * mat
+        new_mat[:-1, 1:] += (1 - p) * mat
+        new_mat[1:, :-1] += (1 - q) * mat
+        new_mat[1:, 1:] += q * mat
+        new_mat[1:-1, :] /= 2
+        mat = new_mat
+
+    return states, mat
 
 # Parameters
-T = 50  # number of periods
-gamma_values = [0.75, 0.85, 0.95, 0.99]
+sigma = 1       # Standard deviation of shocks
+N = 7           # Number of states
+T = 50          # Simulation length
+rho_values = [0.75, 0.85, 0.95, 0.99]  # Different persistence values
 mu = 0.5
-sigma = 1
 
-# Initialize storage for all paths
-all_paths = {}
+# Set seed for reproducibility
+np.random.seed(2025)
 
-# Draw initial state (uniform distribution)
-initial_state_idx = np.random.randint(0, 7)  # 7 states
+# Initialize dictionary to store simulations
+simulations = {}
 
-# Generate paths for each gamma
-for gamma in gamma_values:
-    # Calculate states and transition matrix using Rouwenhorst method
-    unconditional_mean = mu / (1 - gamma)
-    unconditional_std = sigma / np.sqrt(1 - gamma**2)
-    
-    # Create state vector
-    N = 7
-    state_min = unconditional_mean - np.sqrt(N-1) * unconditional_std
-    state_max = unconditional_mean + np.sqrt(N-1) * unconditional_std
-    states = np.linspace(state_min, state_max, N)
-    
-    # Create transition matrix (simplified for example)
-    p = q = (1 + gamma) / 2
-    P = np.zeros((N, N))
-    # ... (transition matrix construction code as before)
-    
-    # Simulate path
-    path = simulate_markov_chain(P, states, T, initial_state_idx)
-    all_paths[gamma] = path.tolist()
+# Run simulations for different values of rho
+for rho in rho_values:
+    # Generate state space and transition matrix
+    states, P = rouwenhorst_ar1(mu, rho, sigma, N)
 
-# Print first few values of each path
-for gamma, path in all_paths.items():
-    print(f"Gamma = {gamma}: {path[:5]}")
+
+    # Step 1: Draw initial state uniformly from the state vector
+    initial_state_idx = np.random.choice(range(N))  
+    chain = [states[initial_state_idx]]
+
+    # Step 2: Simulate Markov Chain
+    current_state_idx = initial_state_idx
+
+    for t in range(1, T):
+        u = np.random.uniform(0, 1)  # Draw from uniform [0,1]
+        cumulative_probs = np.cumsum(P[current_state_idx])  # CDF of transition row
+        next_state_idx = np.where(u <= cumulative_probs)[0][0]
+        chain.append(states[next_state_idx])
+        current_state_idx = next_state_idx
+
+    simulations[rho] = np.array(chain)
+
+# Plot all simulations on one graph
+plt.figure(figsize=(10, 5))
+for rho in rho_values:
+    plt.step(range(T), simulations[rho], linestyle="-", label=f"gamma = {rho}")
+
+plt.xlabel("Time Period")
+plt.ylabel("State")
+plt.title("Simulated Markov Chains for Different $\gamma$ Values")
+plt.legend()
+plt.grid(True)
+
+# Save plot
+output_folder = "Output"
+os.makedirs(output_folder, exist_ok=True)
+plot_path = os.path.join(output_folder, "multi_markov_simulation.png")
+plt.savefig(plot_path)
+plt.show()
+
+print(f"Simulation completed. Plot saved at {plot_path}")

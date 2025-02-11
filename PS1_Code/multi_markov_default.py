@@ -7,6 +7,7 @@ sigma = 1       # Standard deviation of shocks
 N = 7           # Number of states
 T = 50          # Simulation length
 rho_values = [0.75, 0.85, 0.95, 0.99]  # Different persistence values
+mu = 0.5
 
 # Set seed for reproducibility
 np.random.seed(2025)
@@ -16,7 +17,7 @@ simulations = {}
 
 # Run simulations for different values of rho
 for rho in rho_values:
-    mc = qe.markov.approximation.rouwenhorst(N, rho, sigma)
+    mc = qe.markov.approximation.rouwenhorst(N, rho, sigma, mu=mu)
     states = mc.state_values
     P = mc.P
 
@@ -37,7 +38,7 @@ for rho in rho_values:
     simulations[rho] = np.array(chain)
 
 # Plot all simulations on one graph
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(10, 5))
 for rho in rho_values:
     plt.step(range(T), simulations[rho], linestyle="-", label=f"gamma = {rho}")
 
