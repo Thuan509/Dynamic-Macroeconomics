@@ -48,37 +48,3 @@ plt.ylabel("State")
 plt.title("Simulated Markov Chain (50 periods)")
 plt.grid(True)
 plt.show()
-'''
-
-# Set seed for reproducibility
-np.random.seed(2025)
-
-# Draw initial state uniformly from the state vector
-initial_state_idx = np.random.choice(range(N))  # Uniformly select index
-mc = [states[initial_state_idx]]
-
-# Simulate Markov Chain
-current_state_idx = initial_state_idx
-
-for t in range(1, T):
-    u = np.random.uniform(0, 1)  # Draw from uniform [0,1]
-    cumulative_probs = np.cumsum(P[current_state_idx])  # CDF of transition row
-
-    # Determine the next state based on cumulative probabilities
-    next_state_idx = np.where(u <= cumulative_probs)[0][0]
-
-    mc.append(states[next_state_idx])
-    current_state_idx = next_state_idx
-
-# Convert to NumPy array for plotting
-mc = np.array(mc)
-
-# Plot the Markov Chain simulation
-plt.figure(figsize=(10, 5))
-plt.step(range(T), mc, linestyle="-", color="b")
-plt.xlabel("Time Period")
-plt.ylabel("State")
-plt.title("Simulated Markov Chain (50 periods)")
-plt.grid(True)
-plt.show()
-'''
