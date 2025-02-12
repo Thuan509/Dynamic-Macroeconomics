@@ -112,7 +112,7 @@ for rho in rho_values:
     state_spaces[rho] = states  # Store initial state space
 
     # Print the initial state space
-    print(f"Initial state space for ρ = {rho}:")
+    print(f"Initial state space for gamma = {rho}:")
     print(states, "\n")
 
 # Plot all simulations on one graph
