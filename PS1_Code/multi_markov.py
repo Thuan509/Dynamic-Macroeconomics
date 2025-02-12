@@ -3,14 +3,12 @@ Question 3d
 multi_markov.py
 -------
 
-This code simulate and plot the Markov Chain for the AR(1) process for different gamma values
-
+This code simulates and plots the Markov Chain for the AR(1) process for different persistence values.
 
 """
 
 import os
 import numpy as np
-import quantecon as qe
 import matplotlib.pyplot as plt
 
 # Rouwenhorst method for discretizing AR(1)
@@ -34,8 +32,8 @@ def rouwenhorst_ar1(mu, rho, sigma, N):
     # Define state space
     y_mean = mu / (1 - rho)  # Unconditional mean
     y_std = sigma / np.sqrt(1 - rho**2)  # Unconditional standard deviation
-    state_min = y_mean - np.sqrt(N-1) * y_std
-    state_max = y_mean + np.sqrt(N-1) * y_std
+    state_min = y_mean - np.sqrt(N - 1) * y_std
+    state_max = y_mean + np.sqrt(N - 1) * y_std
     states = np.linspace(state_min, state_max, N)
 
     if N == 1:
@@ -54,6 +52,42 @@ def rouwenhorst_ar1(mu, rho, sigma, N):
 
     return states, mat
 
+# Simulation function
+def simulate(grid, pmat, T, seed=2025):
+    """
+    Simulates a Markov chain given a grid of points from the discretized process and the transition matrix.
+
+    Parameters:
+        grid : (1, N) array
+            Grid of discretized state points.
+        pmat : (N, N) array
+            Transition probability matrix.
+        T : int
+            Number of periods to simulate.
+        seed : int, optional (default=2025)
+            Seed for reproducibility.
+
+    Returns:
+        y : (T,) array
+            Simulated series of the Markov chain.
+    """
+    np.random.seed(seed)
+
+    N = grid.shape[1]  # Number of states
+
+    # Draw initial state from a uniform distribution
+    state0 = np.random.choice(N, p=np.ones(N) / N)
+
+    cmat = np.cumsum(pmat, axis=1)  # CDF matrix
+    y = np.zeros(T)  # Store simulated values
+
+    for t in range(T):
+        y[t] = grid[0, state0]  # Store current state value
+        rand_val = np.random.uniform()  # Draw random value
+        state0 = np.searchsorted(cmat[state0, :], rand_val)  # Find next state
+
+    return y
+
 # Parameters
 sigma = 1       # Standard deviation of shocks
 N = 7           # Number of states
@@ -64,35 +98,27 @@ mu = 0.5
 # Set seed for reproducibility
 np.random.seed(2025)
 
-# Initialize dictionary to store simulations
+# Dictionary to store simulations
 simulations = {}
+
+# Store initial state spaces
+state_spaces = {}
 
 # Run simulations for different values of rho
 for rho in rho_values:
-    # Generate state space and transition matrix
     states, P = rouwenhorst_ar1(mu, rho, sigma, N)
+    y_sim = simulate(states.reshape(1, -1), P, T)  # Reshape for consistency
+    simulations[rho] = y_sim  # Store simulation result
+    state_spaces[rho] = states  # Store initial state space
 
-
-    # Step 1: Draw initial state uniformly from the state vector
-    initial_state_idx = np.random.choice(range(N))  
-    chain = [states[initial_state_idx]]
-
-    # Step 2: Simulate Markov Chain
-    current_state_idx = initial_state_idx
-
-    for t in range(1, T):
-        u = np.random.uniform(0, 1)  # Draw from uniform [0,1]
-        cumulative_probs = np.cumsum(P[current_state_idx])  # CDF of transition row
-        next_state_idx = np.where(u <= cumulative_probs)[0][0]
-        chain.append(states[next_state_idx])
-        current_state_idx = next_state_idx
-
-    simulations[rho] = np.array(chain)
+    # Print the initial state space
+    print(f"Initial state space for ρ = {rho}:")
+    print(states, "\n")
 
 # Plot all simulations on one graph
 plt.figure(figsize=(10, 5))
 for rho in rho_values:
-    plt.step(range(T), simulations[rho], linestyle="-", label=f"gamma = {rho}")
+    plt.plot(range(T), simulations[rho], linestyle="-", label=f"$\gamma$ = {rho}")
 
 plt.xlabel("Time Period")
 plt.ylabel("State")
@@ -107,4 +133,13 @@ plot_path = os.path.join(output_folder, "multi_markov_simulation.png")
 plt.savefig(plot_path)
 plt.show()
 
+# Save state spaces to a text file
+state_space_file = os.path.join(output_folder, "state_spaces.txt")
+
+with open(state_space_file, "w", encoding="utf-8") as f:
+    for rho, states in state_spaces.items():
+        f.write(f"$\gamma$ = {rho}\n")
+        f.write(np.array2string(states, precision=4) + "\n\n")
+
+print(f"State spaces saved in {state_space_file}")        
 print(f"Simulation completed. Plot saved at {plot_path}")
