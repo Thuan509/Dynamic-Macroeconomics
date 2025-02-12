@@ -138,7 +138,7 @@ state_space_file = os.path.join(output_folder, "state_spaces.txt")
 
 with open(state_space_file, "w", encoding="utf-8") as f:
     for rho, states in state_spaces.items():
-        f.write(f"$\gamma$ = {rho}\n")
+        f.write(f"gamma = {rho}\n")
         f.write(np.array2string(states, precision=4) + "\n\n")
 
 print(f"State spaces saved in {state_space_file}")        
