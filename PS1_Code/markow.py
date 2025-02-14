@@ -108,7 +108,7 @@ def simulate(grid, pmat, T, state_max, seed=2025):
     plt.title("Simulated Markov Chain (50 periods)")
     plt.ylim(min(states), state_max)  # Ensuring correct upper bound
 
-    # Set y-ticks with step size of 1, 2, 3, 4, 5
+    # Set y-ticks with step size of 1
     tick_step = 1  # Adjustable step size
     y_ticks = np.arange(np.floor(min(states)), np.ceil(state_max) + tick_step, tick_step).tolist()
 
