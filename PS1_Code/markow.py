@@ -11,9 +11,6 @@ This code simulate and plot the Markov Chain for the AR(1) process.
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy import cumsum,linspace,nonzero,ones,zeros
-from numpy.random import uniform
-
 
 # Rouwenhorst method for discretizing AR(1)
 def rouwenhorst_ar1(mu, rho, sigma, N):
@@ -29,6 +26,7 @@ def rouwenhorst_ar1(mu, rho, sigma, N):
     Returns:
         states : Grid for AR(1) process
         P      : Transition probability matrix
+        state_max : Maximum state value (upper bound)
     """
     p = (1 + rho) / 2
     q = p
@@ -41,7 +39,7 @@ def rouwenhorst_ar1(mu, rho, sigma, N):
     states = np.linspace(state_min, state_max, N)
 
     if N == 1:
-        return np.array([0.0]), np.array([[1.0]])
+        return np.array([0.0]), np.array([[1.0]]), state_max
 
     # Transition matrix using Rouwenhorst's method
     mat = np.array([[p, 1 - p], [1 - q, q]])  # Base case (N=2)
@@ -54,7 +52,7 @@ def rouwenhorst_ar1(mu, rho, sigma, N):
         new_mat[1:-1, :] /= 2
         mat = new_mat
 
-    return states, mat
+    return states, mat, state_max
 
 # Parameters
 mu = 0.5       # Intercept
@@ -64,54 +62,62 @@ N = 7          # Number of states
 T = 50         # Simulation length
 
 # Generate state space and transition matrix
-states, P = rouwenhorst_ar1(mu, rho, sigma, N)
+states, P, state_max = rouwenhorst_ar1(mu, rho, sigma, N)
 
-#%% Simulation function.
-
-def simulate(grid, pmat, T, seed=2025):
+def simulate(grid, pmat, T, state_max, seed=2025):
     """
     Simulates a Markov chain given a grid of points from the discretized process and the transition matrix.
 
     Parameters:
-        grid : (K, N) array
+        grid : (N,) array
             Grid of discretized state points.
         pmat : (N, N) array
             Transition probability matrix.
         T : int
             Number of periods to simulate.
+        state_max : float
+            Maximum state value for y-axis limit.
         seed : int, optional (default=2025)
             Seed for reproducibility.
 
     Returns:
-        y : (K, T) array
+        y : (T,) array
             Simulated series of the Markov chain.
     """
-
-    #%% Set seed for reproducibility.
     np.random.seed(seed)
-
-    #%% Initialize.
-    N = grid.shape[1]  # Number of states.
+    N = grid.shape[0]  # Number of states.
     
-    # Draw initial state from a uniform distribution over states
+    # Draw initial state randomly
     state0 = np.random.choice(N, p=np.ones(N)/N)  
 
-    #%% Simulate.
-    cmat = np.cumsum(pmat, axis=1)  # CDF matrix.
-    y = np.zeros((grid.shape[0], T))  # Container for simulated values.
+    # Cumulative probability matrix
+    cmat = np.cumsum(pmat, axis=1)  
 
+    # Simulate
+    y = np.zeros(T)
     for t in range(T):
-        y[:, t] = grid[:, state0]  # Store current state value
+        y[t] = grid[state0]  # Store current state value
         rand_val = np.random.uniform()  # Draw random value
         state0 = np.searchsorted(cmat[state0, :], rand_val)  # Find next state
 
-    #%% Plot simulation.
+    # Plot simulation with correct range
     plt.figure(figsize=(10, 5))
-    plt.plot(range(T), y[0, :], linestyle='-', color='b', alpha=0.7)
+    plt.plot(range(T), y, linestyle='-', color='b', alpha=0.7)
     plt.xlabel("Time Period")
     plt.ylabel("State Value")
     plt.title("Simulated Markov Chain (50 periods)")
+    plt.ylim(min(states), state_max)  # Ensuring correct upper bound
+
+    # Set y-ticks with step size of 1, 2, 3, 4, 5
+    tick_step = 1  # Adjustable step size
+    y_ticks = np.arange(np.floor(min(states)), np.ceil(state_max) + tick_step, tick_step).tolist()
+
+    # Ensure state_max is explicitly included
+    if state_max not in y_ticks:
+        y_ticks.append(state_max)
+    plt.yticks(sorted(y_ticks))  # Apply sorted ticks to keep order
     plt.grid(True)
+
     # Save plot
     output_folder = "Output"
     os.makedirs(output_folder, exist_ok=True)
@@ -123,4 +129,5 @@ def simulate(grid, pmat, T, seed=2025):
 
     return y
 
-simulate(simulate(states.reshape(1, -1), P, T))
+# Run the simulation
+simulated_series = simulate(states, P, T, state_max)
