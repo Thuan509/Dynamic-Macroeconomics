@@ -7,149 +7,116 @@ This code solves the model.
 """
 
 #%% Imports from Python
-from numpy import argmax,expand_dims,inf,squeeze,tile,zeros,seterr
+from numpy import argmax, expand_dims, inf, squeeze, tile, zeros, seterr
 from numpy.linalg import norm
-from scipy.optimize import fminbound
 from types import SimpleNamespace
 import time
+
 seterr(all='ignore')
 
 #%% Solve the model using VFI.
 def plan_allocations(myClass):
     '''
-    
-    This function solves the stochastic growth model.
+    Solves the stochastic growth model with inelastic labor (n=1),
+    tax distortions, and government spending.
     
     Input:
         myClass : Model class with parameters, grids, and utility function.
-        
     '''
 
     print('\n--------------------------------------------------------------------------------------------------')
-    print('Solving the Model by Value Function Iteration')
+    print('Solving the Model by Value Function Iteration with Inelastic Labor Supply (n=1)')
     print('--------------------------------------------------------------------------------------------------\n')
     
-    # Namespace for optimal policy funtions.
-    setattr(myClass,'sol',SimpleNamespace())
+    # Namespace for optimal policy functions.
+    setattr(myClass, 'sol', SimpleNamespace())
     sol = myClass.sol
 
     # Model parameters, grids and functions.
-    
-    par = myClass.par # Parameters.
+    par = myClass.par  # Parameters
 
-    beta = par.beta # Discount factor.
-    sigma = par.sigma # CRRA.
-    gamma = par.gamma # Weight on leisure.
-    nu = par.nu # Frisch elasticity.
+    beta = par.beta  # Discount factor
+    sigma = par.sigma  # CRRA
+    alpha = par.alpha  # Capital share
+    delta = par.delta  # Depreciation rate
+    tau_k = par.tau_k_ss  # Capital tax rate
+    tau_n = par.tau_n_ss  # Labor tax rate
+    g_ss = par.g_ss  # Government spending
 
-    alpha = par.alpha # Capital's share of income.
-    delta = par.delta # Depreciation rate
+    klen = par.klen  # Grid size for capital
+    kgrid = par.kgrid  # Capital grid
 
-    klen = par.klen # Grid size for k.
-    kgrid = par.kgrid # Grid for k (state and choice).
+    Alen = par.Alen  # Grid size for A
+    Agrid = par.Agrid[0]  # Productivity grid
+    pmat = par.pmat  # Transition matrix for A
 
-    Alen = par.Alen # Grid size for A.
-    Agrid = par.Agrid[0] # Grid for A.
-    pmat = par.pmat # Grid for A.
+    kmat = tile(expand_dims(kgrid, axis=1), (1, Alen))  # Capital matrix
+    Amat = tile(expand_dims(Agrid, axis=0), (klen, 1))  # Productivity matrix
 
-    kmat = tile(expand_dims(kgrid,axis=1),(1,Alen)) # k for each value of A.
-    Amat = tile(expand_dims(Agrid,axis=0),(klen,1)) # A for each value of k.
-
-    util = par.util # Utility function.
-    n0 = zeros((klen,klen,Alen))# Container for n.
+    util = par.util  # Utility function
 
     t0 = time.time()
 
-    # Solve for labor choice.
-    print('--------------------------------------Solving for Labor Supply------------------------------------\n')
-    for h1 in range(0,klen): # Loop over k state.
-        for h2 in range(0,klen): # Loop over k choice.
-            for h3 in range(0,Alen): # Loop over A state.
-                # Intratemporal condition.
-                foc = lambda n: intra_foc(n,kgrid[h2],Agrid[h3],kgrid[h1],alpha,delta,sigma,nu,gamma)
-                n0[h1,h2,h3] = fminbound(foc,0.0,1.0)
-        
-        # Print counter.
-        if h1%25 == 0:
-            print('Capital State: ',h1,'.\n')
-
     print('--------------------------------------Iterating on Bellman Eq.------------------------------------\n')
 
-    # Value Function Iteration.
-    y0 = Amat*(kmat**alpha)*(squeeze(n0[:,1,:])**(1.0-alpha)) # Given combinations of k and A and the value of n associated with the lowest possible k'.
-    i0 = delta*kmat # In steady state, k=k'=k*.
-    c0 = y0-i0 # Steady-state consumption.
-    c0[c0<0.0] = 0.0
-    v0 = util(c0,squeeze(n0[:,1,:]),sigma,nu,gamma)/(1.0-beta) # Guess of value function for each value of k.
-    v0[c0<=0.0] = -inf # Set the value function to negative infinity number when c <= 0.
-                    
-    crit = 1e-6;
-    maxiter = 10000;
-    diff = 1;
-    iter = 0;
+    # Value Function Iteration
+    y0 = Amat * (kmat**alpha)  # Output with n=1
+    i0 = delta * kmat  # In steady state, k = k' = k*
+    c0 = (1 - tau_k) * (y0 - i0) - g_ss  # Consumption adjusted for taxes and government spending
+    c0[c0 < 0.0] = 0.0
+    v0 = util(c0, sigma) / (1.0 - beta)  # Initial value function
+    v0[c0 <= 0.0] = -inf  # Prevent negative consumption
 
-    while (diff > crit) and (iter < maxiter): # Iterate on the Bellman Equation until convergence.
-    
-        v1 = zeros((klen,Alen)) # Container for V.
-        k1 = zeros((klen,Alen)) # Container for k'.
-        n1 = zeros((klen,Alen)) # Container for n.
+    crit = 1e-6
+    maxiter = 10000
+    diff = 1
+    iter = 0
 
-        for p in range(0,klen): # Loop over the k-states.
-            for j in range(0,Alen): # Loop over the A-states.
+    while (diff > crit) and (iter < maxiter):  # Iterate on the Bellman Equation until convergence
+        v1 = zeros((klen, Alen))  # New value function
+        k1 = zeros((klen, Alen))  # Capital policy function
 
-                # Macro variables.
-                y = Agrid[j]*(kgrid[p]**alpha)*(squeeze(n0[p,:,j])**(1.0-alpha)) # Output in the "last period", given combinations of k and A and the value of n associated with the lowest possible k'.
-                i = kgrid-((1-delta)*kgrid[p]) # Possible values for investment, i=k'-(1-delta)k, when choosing k' from kgrid and given k.
-                c = y-i # Possible values for consumption, c = y-i, given y and i.
-                c[c<0.0] = 0.0
+        for p in range(0, klen):  # Loop over capital states
+            for j in range(0, Alen):  # Loop over productivity states
 
-                # Solve the maximization problem.
-                ev = squeeze(v0@pmat[j,:].T); #  The next-period value function is the expected value function over each possible next-period A, conditional on the current state j.
-                vall = util(c,n0[p,:,j],sigma,nu,gamma) + beta*ev # Compute the value function for each choice of k', given k.
-                vall[c<=0.0] = -inf # Set the value function to negative infinity number when c <= 0.
-                v1[p,j] = max(vall) # Maximize: vmax is the maximized value function; ind is where it is in the grid.
-                k1[p,j] = kgrid[argmax(vall)] # Optimal k'.
-                n1[p,j] = n0[p,argmax(vall),j] # Choice of n given k,k', and A.
-        
-        diff = norm(v1-v0) # Check convergence.
-        v0 = v1; # Update guess.
+                # Compute output with tax distortions
+                y = Agrid[j] * (kgrid[p]**alpha)  # Output (n=1)
+                i = kgrid - ((1 - delta) * kgrid[p])  # Investment: i = k' - (1 - delta) k
+                c = (1 - tau_k) * (y - i) - g_ss  # Consumption adjusted for government spending
+                c[c < 0.0] = 0.0
 
-        iter = iter + 1; # Update counter.
-        
-        # Print counter.
-        if iter%25 == 0:
-            print('Iteration: ',iter,'.\n')
+                # Solve the maximization problem
+                ev = squeeze(v0 @ pmat[j, :].T)  # Expected value function
+                vall = util(c, sigma) + beta * ev  # Bellman equation
+                vall[c <= 0.0] = -inf  # Prevent negative consumption
+                v1[p, j] = max(vall)  # Maximized value function
+                k1[p, j] = kgrid[argmax(vall)]  # Optimal k'
+
+        diff = norm(v1 - v0)  # Check convergence
+        v0 = v1  # Update value function
+        iter += 1  # Update counter
+
+        # Print iteration progress
+        if iter % 25 == 0:
+            print('Iteration: ', iter, '.\n')
 
     t1 = time.time()
-    print('Elapsed time is ',t1-t0,' seconds.')
-    print('Converged in ',iter,' iterations.')
+    print('Elapsed time is ', t1 - t0, ' seconds.')
+    print('Converged in ', iter, ' iterations.')
 
-    # Macro variables, value, and policy functions.
-    sol.y = Amat*(kmat**alpha)*(n1**(1.0-alpha)) # Output.
-    sol.k = k1 # Capital policy function.
-    sol.n = n1 # Labor supply policy function.
-    sol.i = k1-((1.0-delta)*kmat) # Investment policy function.
-    sol.c = sol.y-sol.i # Consumption policy function.
-    sol.c[sol.c<0.0] = 0.0
-    sol.v = v1 # Value function.
-    sol.v[sol.c<=0.0] = -inf
+    # Compute macro variables and policy functions
+    sol.y = Amat * (kmat**alpha)  # Output (n=1)
+    sol.k = k1  # Capital policy function
+    sol.i = k1 - ((1.0 - delta) * kmat)  # Investment policy function
+    sol.c = (1 - tau_k) * (sol.y - sol.i) - g_ss  # Adjusted consumption
+    sol.c[sol.c < 0.0] = 0.0
+    sol.v = v1  # Value function
+    sol.v[sol.c <= 0.0] = -inf
 
-#%% Intra-temporal conditions for labor.
-def intra_foc(n,kp,A,k,alpha,delta,sigma,nu,gamma):
-
-    c = (A*(k**alpha)*(n**(1.0-alpha)))+((1.0-delta)*k-kp)
-    mpl = A*(1.0-alpha)*((k/n)**alpha)
-
-    # Leisure.
-    un = -gamma*(1.0-n)**(1.0/nu)
-    
-    # Consumption.
+#%% Utility function (Modified for inelastic labor)
+def util(c, sigma):
+    """ CRRA utility function (no labor choice since n=1) """
     if sigma == 1.0:
-        uc = 1.0/c # Log utility.
+        return c**(1 - sigma) / (1 - sigma) if c > 0 else -inf
     else:
-        uc = c**(-sigma) # CRRA utility.
-    
-    # Total.
-    ucn = uc*mpl + un
-
-    return ucn
+        return c**(1 - sigma) / (1 - sigma)

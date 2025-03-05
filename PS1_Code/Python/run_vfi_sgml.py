@@ -8,27 +8,41 @@ This code solves the stochastic growth model using value function iteration.
 
 #%% Import from Python and set project directory
 import os
-os.chdir("C:\\Users\\xmgb\\Dropbox\\02_FUV\\teaching\\spring_2025\\dynamic_macro\\code\\vfi_sgml_python")
-main = os.getcwd()
-figout = main+"\\output\\figures"
 
-#%% Import from folder
+# Set working directory
+os.chdir(r"C:\Users\Do Thu An\OneDrive\Desktop\Dynamic Macroeconomics\Problem sets\Dynamic-Macroeconomics\PS1_Code\Python")
+main = os.getcwd()
+figout = os.path.join(main, "output", "figures")
+
+#%% Import model functions
 from model import planner
 from solve import plan_allocations
 from simulate import grow_economy
 from my_graph import track_growth
 
-#%% Stochastic Growth Model.
-benevolent_dictator = planner()
+#%% Stochastic Growth Model - Solving, Simulating, and Plotting
+if __name__ == "__main__":
 
-# Set the parameters, state space, and utility function.
-benevolent_dictator.setup(main=main,figout=figout,beta = 0.96,sigma=2.00) # You can set the parameters here or use the defaults.
+    print("\n-------------------- Running the Stochastic Growth Model --------------------\n")
+    
+    # Step 1: Initialize model
+    benevolent_dictator = planner()
 
-# Solve the model.
-plan_allocations(benevolent_dictator) # Obtain the policy functions for capital.
+    # Step 2: Set model parameters
+    benevolent_dictator.setup(
+        main=main, figout=figout, beta=0.96, sigma=2.00
+    )  # Customize parameters if needed
 
-# Simulate the model.
-grow_economy(benevolent_dictator) # Simulate forward in time.
+    # Step 3: Solve the model (Compute policy functions)
+    print("\nSolving the model...")
+    plan_allocations(benevolent_dictator)
 
-# Graphs.
-track_growth(benevolent_dictator) # Plot policy functions and simulations.
+    # Step 4: Simulate the model (Forward simulation in time)
+    print("\nSimulating the economy...")
+    grow_economy(benevolent_dictator)
+
+    # Step 5: Generate graphs (Plot policy functions & simulations)
+    print("\nGenerating graphs...")
+    track_growth(benevolent_dictator)
+
+    print("\n-------------------- Stochastic Growth Model Completed --------------------\n")

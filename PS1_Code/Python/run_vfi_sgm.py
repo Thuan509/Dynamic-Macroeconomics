@@ -8,7 +8,7 @@ This code solves the stochastic growth model using value function iteration.
 
 #%% Import from Python and set project directory
 import os
-os.chdir("C:\Users\Do Thu An\OneDrive\Desktop\Dynamic Macroeconomics\Problem sets\Dynamic-Macroeconomics\PS1_Code\Python")
+os.chdir(r"C:\Users\Do Thu An\OneDrive\Desktop\Dynamic Macroeconomics\Problem sets\Dynamic-Macroeconomics\PS1_Code\Python")
 main = os.getcwd()
 figout = main+"\\output\\figures"
 

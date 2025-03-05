@@ -7,6 +7,7 @@ This code sets up the model.
 """
 
 #%% Imports from Python
+import numpy as np
 from numpy import count_nonzero,exp,expand_dims,linspace,log,tile
 from scipy import stats
 from types import SimpleNamespace
@@ -138,21 +139,31 @@ class planner():
         print('mu: ',par.mu)
 
 #%% CRRA Utility Function.
-def util(c,n,sigma,nu,gamma):
-
-    # Leisure.
-    un = ((1.0-n)**(1.0+(1.0/nu)))/(1.0+(1.0/nu))
-    
-    # Consumption.
+# Utility Function with government spending
+def util(c, g, sigma):
     if sigma == 1:
-        uc = log(c) # Log utility.
+        return np.log(c) + np.log(1 - g)  # Log utility case
     else:
-        uc = (c**(1.0-sigma))/(1.0-sigma) # CRRA utility.
-    
-    # Total.
-    u = uc + gamma*un;
+        return (c**(1 - sigma) / (1 - sigma)) + ((1 - g)**(1 - sigma) / (1 - sigma))
 
-    return u
+# Capital Evolution Equation
+def capital_evolution(k, A, alpha, n, c, delta):
+    """ Law of motion for capital """
+    return A * (k**alpha) * (n**(1 - alpha)) - c + (1 - delta) * k
+
+# Technology Shock Process
+def update_productivity(A_prev, mu, rho, sigma_eps):
+    eps = np.random.normal(0, sigma_eps)
+    return np.exp(mu + rho * np.log(A_prev) + eps)
+
+#%% Tax and Government Spending Evolution
+def update_policies(tau_k_prev, tau_n_prev, g_prev, par):
+    """ AR(1) process for tax rates and government spending """
+    tau_k = max(0, par.rho_tau_k * tau_k_prev + np.random.normal(0, par.sigma_tau_k))
+    tau_n = max(0, par.rho_tau_n * tau_n_prev + np.random.normal(0, par.sigma_tau_n))
+    g = max(0, par.rho_g * g_prev + np.random.normal(0, par.sigma_g))
+    return tau_k, tau_n, g
+
 
 #%% Tauchen's Method.
 def tauchen(mu,rho,sigma,N,m):
