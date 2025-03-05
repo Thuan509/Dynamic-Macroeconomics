@@ -68,13 +68,16 @@ class planner():
         par.beta = 0.96 # Discount factor.
         par.sigma = 2.00 # CRRA.
 
+        par.gamma = 1.00 # Weight on leisure: Higher values mean that leisure has a higher weight in the utility function.
+        par.nu = 0.04 # Frisch Elasticity: Higher values of this mean that the labor choice becomes more sensitive to productivity shocks.
+
         # Technology.
 
         par.alpha = 0.33 # Capital's share of income.
         par.delta = 0.05 # Depreciation rate of physical capital.
 
         par.sigma_eps = 0.07 # Std. dev of productivity shocks.
-        par.rho = 0.85 # Persistence of AR(1) process.
+        par.rho = 0.90 # Persistence of AR(1) process.
         par.mu = 0.0 # Intercept of AR(1) process.
 
         # Simulation parameters.
@@ -100,6 +103,8 @@ class planner():
         assert par.figout != None
         assert par.beta > 0 and par.beta < 1.00
         assert par.sigma >= 1.00
+        assert par.gamma > 0
+        assert par.nu > 0
         assert par.alpha > 0 and par.alpha < 1.00
         assert par.delta >= 0 and par.delta <= 1.00
         assert par.sigma_eps > 0
@@ -122,6 +127,8 @@ class planner():
         
         print('beta: ',par.beta)
         print('sigma: ',par.sigma)
+        print('nu: ',par.nu)
+        print('gamma: ',par.gamma)
         print('kmin: ',par.kmin)
         print('kmax: ',par.kmax)
         print('alpha: ',par.alpha)
@@ -131,14 +138,20 @@ class planner():
         print('mu: ',par.mu)
 
 #%% CRRA Utility Function.
-def util(c,sigma):
+def util(c,n,sigma,nu,gamma):
 
-    # CRRA utility
-    if sigma == 1:
-        u = log(c) # Log utility.
-    else:
-        u = (c**(1-sigma))/(1-sigma) # CRRA utility.
+    # Leisure.
+    un = ((1.0-n)**(1.0+(1.0/nu)))/(1.0+(1.0/nu))
     
+    # Consumption.
+    if sigma == 1:
+        uc = log(c) # Log utility.
+    else:
+        uc = (c**(1.0-sigma))/(1.0-sigma) # CRRA utility.
+    
+    # Total.
+    u = uc + gamma*un;
+
     return u
 
 #%% Tauchen's Method.

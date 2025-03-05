@@ -71,9 +71,20 @@ def track_growth(myClass):
     figname = myClass.par.figout+"\\ipol.png"
     savefig(figname)
 
-    # Plot value function.
+    # Plot labor supply policy function.
     
     figure(5)
+    plot(par.kgrid,sol.n)
+    xlabel('$k_{t}$')
+    ylabel('$n_t$') 
+    title('Labor Supply Policy Function')
+
+    figname = myClass.par.figout+"\\npol.png"
+    savefig(figname)
+    
+    # Plot value function.
+    
+    figure(6)
     plot(par.kgrid,sol.v)
     xlabel('$k_{t}$')
     ylabel('$V_t(k_t)$') 
@@ -86,7 +97,7 @@ def track_growth(myClass):
     
     tgrid = linspace(1,par.T,par.T,dtype=int)
 
-    figure(6)
+    figure(7)
     plot(tgrid,sim.ysim)
     xlabel('Time')
     ylabel('$y^{sim}_t$') 
@@ -97,7 +108,7 @@ def track_growth(myClass):
     
     # Plot simulated capital choice.
     
-    figure(7)
+    figure(8)
     plot(tgrid,sim.ksim)
     xlabel('Time')
     ylabel('$k^{sim}_{t+1}$') 
@@ -108,7 +119,7 @@ def track_growth(myClass):
     
     # Plot simulated consumption.
     
-    figure(8)
+    figure(9)
     plot(tgrid,sim.csim)
     xlabel('Time')
     ylabel('$c^{sim}_{t}$') 
@@ -119,7 +130,7 @@ def track_growth(myClass):
     
     # Plot simulated investment.
     
-    figure(9)
+    figure(10)
     plot(tgrid,sim.isim)
     xlabel('Time')
     ylabel('$i^{sim}_{t}$') 
@@ -130,7 +141,7 @@ def track_growth(myClass):
     
     # Plot simulated utility.
     
-    figure(10)
+    figure(11)
     plot(tgrid,sim.usim)
     xlabel('Time')
     ylabel('$u^{sim}_t$') 
@@ -141,13 +152,24 @@ def track_growth(myClass):
 
     # Plot simulated productivity.
     
-    figure(11)
+    figure(12)
     plot(tgrid,sim.Asim)
     xlabel('Time')
     ylabel('$A^{sim}_t$') 
     title('Simulated Productivity')
 
     figname = myClass.par.figout+"\\Asim.png"
+    savefig(figname)
+
+    # Plot simulated labor supply.
+    
+    figure(13)
+    plot(tgrid,sim.nsim)
+    xlabel('Time')
+    ylabel('$n^{sim}_t$') 
+    title('Simulated Labor Supply')
+
+    figname = myClass.par.figout+"\\nsim.png"
     savefig(figname)
 
     #show()
