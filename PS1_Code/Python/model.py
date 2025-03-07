@@ -12,7 +12,7 @@ from numpy import count_nonzero,exp,expand_dims,linspace,log,tile
 from scipy import stats
 from types import SimpleNamespace
 
-#%% Deterministic Growth Model.
+#%% Stochastic Growth Model.
 class planner():
     '''
     
@@ -36,7 +36,7 @@ class planner():
         print('--------------------------------------------------------------------------------------------------')
         print('Model')
         print('--------------------------------------------------------------------------------------------------\n')
-        print('   The model is the deterministic growth model and is solved via Value Function Iteration.')
+        print('   The model is the stochastic growth model and is solved via Value Function Iteration.')
         
         print('\n--------------------------------------------------------------------------------------------------')
         print('Household')
@@ -77,6 +77,15 @@ class planner():
         par.alpha = 0.33 # Capital's share of income.
         par.delta = 0.05 # Depreciation rate of physical capital.
 
+        # Government and tax policy
+        par.tau_k_ss = 0.20  # Steady-state capital tax rate
+        par.tau_n_ss = 0.15  # Steady-state labor tax rate
+        par.g_ss = 0.18  # Steady-state government spending
+        par.rho_tau_k = 0.90  # Persistence of capital tax rate
+        par.sigma_tau_k = 0.02  # Std dev of capital tax shock
+        par.rho_g = 0.92  # Persistence of government spending
+        par.sigma_g = 0.03  # Std dev of government spending shock
+
         par.sigma_eps = 0.07 # Std. dev of productivity shocks.
         par.rho = 0.90 # Persistence of AR(1) process.
         par.mu = 0.0 # Intercept of AR(1) process.
@@ -85,12 +94,17 @@ class planner():
         par.seed_sim = 2025 # Seed for simulation.
         par.T = 100 # Number of time periods.
 
-        # Set up capital grid.
-        par.kss = (par.alpha/((1.0/par.beta)-1+par.delta))**(1.0/(1.0-par.alpha)) # Steady state capital.
-            
-        par.klen = 300 # Grid size for k.
-        par.kmax = 1.25*par.kss # Upper bound for k.
-        par.kmin = 0.75*par.kss # Minimum k.
+        # Simulation parameters
+        par.seed_sim = 2025
+        par.T = 100  # Number of time periods
+
+        # Capital grid
+        par.kss = (par.alpha / ((1.0 / par.beta) - 1 + par.delta)) ** (1.0 / (1.0 - par.alpha)) # Steady state capital.
+        par.klen = 300 # Grid size for k
+        par.kmax = 1.25 * par.kss # Upper bound for k
+        par.kmin = 0.75 * par.kss # Minimum k
+        par.kgrid = linspace(par.kmin, par.kmax, par.klen)
+
         
         # Discretize productivity.
         par.Alen = 7 # Grid size for A.
@@ -141,10 +155,18 @@ class planner():
 #%% CRRA Utility Function.
 # Utility Function with government spending
 def util(c, g, sigma):
-    if sigma == 1:
-        return np.log(c) + np.log(1 - g)  # Log utility case
+    """ CRRA utility function (no labor choice since n=1) """
+    # Government spending 
+    ug = (g**(1 - sigma)) / (1 - sigma)
+    # Consumption
+    if sigma == 1.0:
+        return np.log(c) + np.log(g)
     else:
-        return (c**(1 - sigma) / (1 - sigma)) + ((1 - g)**(1 - sigma) / (1 - sigma))
+        uc =  (c**(1 - sigma)) / (1 - sigma)
+    # Total
+    u = uc + ug
+    return u
+
 
 # Capital Evolution Equation
 def capital_evolution(k, A, alpha, n, c, delta):

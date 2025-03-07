@@ -22,26 +22,23 @@ from my_graph import track_growth
 
 #%% Stochastic Growth Model - Solving, Simulating, and Plotting
 if __name__ == "__main__":
-
     print("\n-------------------- Running the Stochastic Growth Model --------------------\n")
     
-    # Step 1: Initialize model
+    # Initialize model
     benevolent_dictator = planner()
 
-    # Step 2: Set model parameters
-    benevolent_dictator.setup(
-        main=main, figout=figout, beta=0.96, sigma=2.00
-    )  # Customize parameters if needed
+    # Set parameters
+    benevolent_dictator.setup(main=main, figout=figout)
 
-    # Step 3: Solve the model (Compute policy functions)
+    # Solve the model
     print("\nSolving the model...")
     plan_allocations(benevolent_dictator)
 
-    # Step 4: Simulate the model (Forward simulation in time)
+    # Simulate the model
     print("\nSimulating the economy...")
     grow_economy(benevolent_dictator)
 
-    # Step 5: Generate graphs (Plot policy functions & simulations)
+    # Generate graphs
     print("\nGenerating graphs...")
     track_growth(benevolent_dictator)
 

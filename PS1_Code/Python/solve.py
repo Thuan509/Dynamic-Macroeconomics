@@ -7,9 +7,11 @@ This code solves the model.
 """
 
 #%% Imports from Python
+import numpy as np
 from numpy import argmax, expand_dims, inf, squeeze, tile, zeros, seterr
 from numpy.linalg import norm
 from types import SimpleNamespace
+from model import util
 import time
 
 seterr(all='ignore')
@@ -53,7 +55,7 @@ def plan_allocations(myClass):
     kmat = tile(expand_dims(kgrid, axis=1), (1, Alen))  # Capital matrix
     Amat = tile(expand_dims(Agrid, axis=0), (klen, 1))  # Productivity matrix
 
-    util = par.util  # Utility function
+    #util = par.util  # Utility function
 
     t0 = time.time()
 
@@ -64,7 +66,7 @@ def plan_allocations(myClass):
     i0 = delta * kmat  # In steady state, k = k' = k*
     c0 = (1 - tau_k) * (y0 - i0) - g_ss  # Consumption adjusted for taxes and government spending
     c0[c0 < 0.0] = 0.0
-    v0 = util(c0, sigma) / (1.0 - beta)  # Initial value function
+    v0 = np.where(c0 > 0, util(c0, par.sigma), -np.inf) / (1.0 - par.beta)  # Initial value function
     v0[c0 <= 0.0] = -inf  # Prevent negative consumption
 
     crit = 1e-6
@@ -116,7 +118,9 @@ def plan_allocations(myClass):
 #%% Utility function (Modified for inelastic labor)
 def util(c, sigma):
     """ CRRA utility function (no labor choice since n=1) """
+    if c <= 0:
+        return -np.inf  # Prevent log errors
     if sigma == 1.0:
-        return c**(1 - sigma) / (1 - sigma) if c > 0 else -inf
+        return np.log(c)
     else:
-        return c**(1 - sigma) / (1 - sigma)
+        return (c**(1 - sigma)) / (1 - sigma)
