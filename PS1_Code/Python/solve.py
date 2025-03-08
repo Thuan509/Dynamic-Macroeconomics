@@ -66,7 +66,8 @@ def plan_allocations(myClass):
     i0 = delta * kmat  # In steady state, k = k' = k*
     c0 = (1 - tau_k) * (y0 - i0) - g_ss  # Consumption adjusted for taxes and government spending
     c0[c0 < 0.0] = 0.0
-    v0 = np.where(c0 > 0, util(c0, par.sigma), -np.inf) / (1.0 - par.beta)  # Initial value function
+    v0 = np.where(c0 > 0, util(c0, g_ss, par.sigma), -np.inf) / (1.0 - par.beta)
+  # Initial value function
     v0[c0 <= 0.0] = -inf  # Prevent negative consumption
 
     crit = 1e-6
@@ -116,11 +117,15 @@ def plan_allocations(myClass):
     sol.v[sol.c <= 0.0] = -inf
 
 #%% Utility function (Modified for inelastic labor)
-def util(c, sigma):
+def util(c, g, sigma):
     """ CRRA utility function (no labor choice since n=1) """
-    if c <= 0:
-        return -np.inf  # Prevent log errors
+    # Government spending 
+    ug = (g**(1 - sigma)) / (1 - sigma)
+    # Consumption
     if sigma == 1.0:
-        return np.log(c)
+        return np.log(c) + np.log(g)
     else:
-        return (c**(1 - sigma)) / (1 - sigma)
+        uc =  (c**(1 - sigma)) / (1 - sigma)
+    # Total
+    u = uc + ug
+    return u
