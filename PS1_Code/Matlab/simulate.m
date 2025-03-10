@@ -44,7 +44,7 @@ classdef simulate
             ksim(1) = kgrid(k0_ind);
             ysim(1) = yout(k0_ind,A0_ind);
             isim(1) = ipol(k0_ind, A0_ind); % Use policy function for investment
-            gsim(1) = gpol(k0_ind, A0_ind); % Use government policy function
+            gsim(1) = gpol(k0_ind);
             csim(1) = cpol(k0_ind,A0_ind);
             usim(1) = model.utility(csim(1), gsim(1), par); % Utility function
 
@@ -62,11 +62,16 @@ classdef simulate
                 % Compute investment correctly using capital accumulation equation
                 isim(j) = ksim(j) - (1 - par.delta) * ksim(j-1);
                 
-                % Interpolate other variables
+                % Compute government spending.
+                gsim(j) = par.tauk * par.r * ksim(j) + par.taun * par.w * par.n - par.delta * par.tauk * ksim(j-1);
+
+                % Compute consuption.
                 csim(j) = interp1(kgrid, cpol(:, A0_ind), ksim(j), 'linear', 'extrap');
-                gsim(j) = interp1(kgrid, gpol(:, A0_ind), ksim(j-1), 'linear', 'extrap');
-                %gsim(j) = par.tauk * par.r * ksim(j) + par.taun * par.w * par.n - par.delta * par.tauk * ksim(j);
+
+                % Compute output.
                 ysim(j) = yout(kt_ind, A0_ind);
+
+                %Compute utility function.
                 usim(j) = model.utility(csim(j), gsim(j), par);
             
                 % Draw next productivity state.

@@ -68,7 +68,7 @@ classdef solve
                             i = max(kgrid(ind) - (1 - delta) * kgrid(p), 1e-6);
 
                             % Compute government spending dynamically.
-                            g = tauk * r * kgrid(ind) + taun * w * n - delta * tauk * kgrid(ind);
+                            g = tauk * r * kgrid(ind) + taun * w * n - delta * tauk * kgrid(p);
 
                             % Compute consumption from budget constraint.
                             c = max(y - i - g, 1e-6); % Ensure positive consumption.
@@ -83,7 +83,6 @@ classdef solve
                         % Store values.
                         v1(p,j) = vmax;
                         k1(p,j) = kgrid(min(max(ind, 1), klen)); % Keep within bounds
-                        g1(p,j) = tauk * r * k1(p,j) + taun * w * n - delta * tauk * k1(p,j); % Store correct g1
                     end
                 end
                 
@@ -103,10 +102,12 @@ classdef solve
             %% Store results.
             sol.y = Amat .* (kmat.^alpha);
             sol.k = k1;
-            sol.i = k1 - (1 - delta) * kmat; % Correct investment calculation.
-            sol.c = sol.y - sol.i - g1; % Adjusted consumption.
+            sol.i = k1 - (1 - delta) * kmat; 
+            sol.g = tauk * r * k1+ taun * w * n - delta * tauk * k1;
+            sol.c = sol.y - sol.i - sol.g; 
             sol.v = v1;
-            sol.g = g1; % Store government spending policy function.
+
+            
             
         end
     end
