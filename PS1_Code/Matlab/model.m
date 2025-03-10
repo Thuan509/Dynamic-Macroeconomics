@@ -42,11 +42,7 @@ classdef model
 
              assert(par.tauk  > 0 && par.tauk  < 1.00,'Tax rate on capital should be between 0 and 1.\n')
              assert(par.taun > 0 && par.taun < 1.00,'Tax rate on income should be between 0 and 1.\n')
-
-             %%% Government spending and transfers
-             par.t = 50; % Transfer to households
-             par.g = 100; % Aggregate government spending
-
+             
             %% Technology.
 
             par.alpha = 0.33; % Capital's share of income.

@@ -37,7 +37,7 @@ classdef solve
             y0 = Amat .* (kmat.^alpha); % Output.
             i0 = kmat - (1 - delta) * kmat; % Investment.
             g0 = tauk * r * kmat + taun * w * n - delta * tauk * kmat; % Government spending.
-            c0 = max(y0 - i0 - g0, 1e-6); % Ensure non-negative consumption.
+            c0 = y0 - i0 - g0; % Consumption.
             v0 = model.utility(c0, g0, par) / (1 - beta); % Initial guess.
 
             v1 = zeros(klen, Alen); % Value function.
@@ -59,31 +59,25 @@ classdef solve
                         % Compute output.
                         y = Agrid(j) * (kgrid(p)^alpha);
                         
+                        % Compute investment choices.
+                        i = kgrid(p) - (1 - delta) * kgrid(p);
+
+                        % Compute government spending.
+                        g = tauk * r * kgrid(p) + taun * w * n - delta * tauk * kgrid(p);
+                        
+                        % Compute consumption from budget constraint.
+                        c = y - i - g;
+
                         % Solve maximization problem.
                         ev = v0 * pmat(j,:)';  
-                        vall = -inf(klen, 1); % Initialize value function array
-
-                        for ind = 1:klen
-                            % Compute investment choices dynamically.
-                            i = max(kgrid(ind) - (1 - delta) * kgrid(p), 1e-6);
-
-                            % Compute government spending dynamically.
-                            g = tauk * r * kgrid(ind) + taun * w * n - delta * tauk * kgrid(ind);
-
-                            % Compute consumption from budget constraint.
-                            c = max(y - i - g, 1e-6); % Ensure positive consumption.
-
-                            % Compute value function.
-                            vall(ind) = model.utility(c, g, par) + beta * ev(ind);
-                        end
-                        
-                        % Choose the best policy.
+                        vall = model.utility(c, g, par) + beta * ev;  
+                        vall(c < 0) = -inf;  
                         [vmax, ind] = max(vall);  
 
                         % Store values.
                         v1(p,j) = vmax;
-                        k1(p,j) = kgrid(min(max(ind, 1), klen)); % Keep within bounds
-                        g1(p,j) = tauk * r * k1(p,j) + taun * w * n - delta * tauk * k1(p,j); % Store correct g1
+                        k1(p,j) = kgrid(ind);
+                        g1(p,j) = g; % Store computed government spending
                     end
                 end
                 
@@ -103,7 +97,7 @@ classdef solve
             %% Store results.
             sol.y = Amat .* (kmat.^alpha);
             sol.k = k1;
-            sol.i = k1 - (1 - delta) * kmat; % Correct investment calculation.
+            sol.i = k1 - (1 - delta) * kmat;
             sol.c = sol.y - sol.i - g1; % Adjusted consumption.
             sol.v = v1;
             sol.g = g1; % Store government spending policy function.
