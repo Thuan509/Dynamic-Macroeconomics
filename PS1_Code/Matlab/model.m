@@ -61,7 +61,7 @@ classdef model
             %% Simulation parameters.
 
             par.seed = 2025; % Seed for simulation.
-            par.T = 100; % Number of time periods.
+            par.T = 28; % Number of time periods.
 
         end
         

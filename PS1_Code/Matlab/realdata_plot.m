@@ -4,7 +4,7 @@ classdef realdata_plot
             %% Extract Variables
             year = data.Year;
             gdp = data.GDP_constant_2015_USD_;
-            gdp_growth = data.GDP_growth_rate__;
+            gdp_growth = data.GDPGrowthRate___;
             capital_share = data.Gross_fixed_capital_formation__of_GDP_;
             capital_growth = data.Gross_capital_formation_growth__;
             fdi = data.FDI_inflow_BoP_US_;
