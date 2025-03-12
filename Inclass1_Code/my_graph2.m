@@ -101,10 +101,10 @@ classdef my_graph2
             retirement_line = par.tr;
             
             %% Plot all variables over the lifecycle
-            figure('Position', [100, 100, 1000, 800])
-            
+            figure('Position', [100, 100, 1000, 800])  % Added missing figure creation
+                    
             % Plot consumption
-            subplot(4, 1, 1)
+            subplot(3, 1, 1)
             plot(periods, sim.c, '-o', 'LineWidth', 1.5)
             xlabel('Age')
             ylabel('Consumption')
@@ -116,7 +116,7 @@ classdef my_graph2
             hold off
             
             % Plot asset holdings
-            subplot(4, 1, 2)
+            subplot(3, 1, 2)
             plot(periods, sim.a, '-s', 'LineWidth', 1.5)
             xlabel('Age')
             ylabel('Assets')
@@ -128,23 +128,11 @@ classdef my_graph2
             hold off
             
             % Plot income
-            subplot(4, 1, 3)
-            plot(periods, sim.y, '-d', 'LineWidth', 1.5)
+            subplot(3, 1, 3)
+            plot(periods, sim.y, '-d', 'LineWidth', 1.5)  % Removed yyaxis left
             xlabel('Age')
             ylabel('Income')
             title('Income over the Life Cycle')
-            grid on
-            % Add vertical line at retirement
-            hold on
-            xline(retirement_line, '--r', 'Retirement')
-            hold off
-            
-            % Plot income state index
-            subplot(4, 1, 4)
-            plot(periods, sim.s, '-x', 'LineWidth', 1.5)
-            xlabel('Age')
-            ylabel('Income State')
-            title('Income State over the Life Cycle')
             grid on
             % Add vertical line at retirement
             hold on
