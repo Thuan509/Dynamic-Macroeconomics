@@ -60,17 +60,17 @@ classdef my_graph
             %% Plot government policy function.
             
             figure(6)
-            plot(par.kgrid, sol.g)
+            plot(par.kgrid, sol.v)
             xlabel({'$g_{t}$'}, 'Interpreter', 'latex')
-            ylabel({'$g_{t+1}$'}, 'Interpreter', 'latex')
-            title('Government Policy Function')
-            savefig(strcat(figout, 'gpol.fig'))
+            ylabel({'$v_t(k_t,A_t)$'}, 'Interpreter', 'latex')
+            title('Value Function')
+            savefig(strcat(figout, 'vfun.fig'))
             
             %% Define time grid.
             tgrid = 1:par.T;
             
             %% Plot simulated output.
-            figure(7)
+            figure(6)
             plot(tgrid, sim.ysim)
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$y^{sim}_t$'}, 'Interpreter', 'latex')
@@ -78,7 +78,7 @@ classdef my_graph
             savefig(strcat(figout, 'ysim.fig'))
             
             %% Plot simulated capital choice.
-            figure(8)
+            figure(7)
             plot(tgrid, sim.ksim)
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$k^{sim}_t$'}, 'Interpreter', 'latex')
@@ -86,7 +86,7 @@ classdef my_graph
             savefig(strcat(figout, 'ksim.fig'))
             
             %% Plot simulated consumption.
-            figure(9)
+            figure(8)
             plot(tgrid, sim.csim)
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$c^{sim}_t$'}, 'Interpreter', 'latex')
@@ -94,7 +94,7 @@ classdef my_graph
             savefig(strcat(figout, 'csim.fig'))
             
             %% Plot simulated investment.
-            figure(10)
+            figure(9)
             plot(tgrid, sim.isim)
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$i^{sim}_t$'}, 'Interpreter', 'latex')
@@ -102,7 +102,7 @@ classdef my_graph
             savefig(strcat(figout, 'isim.fig'))
             
             %% Plot simulated utility.
-            figure(11)
+            figure(10)
             plot(tgrid, sim.usim)
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$u^{sim}_t$'}, 'Interpreter', 'latex')
@@ -110,7 +110,7 @@ classdef my_graph
             savefig(strcat(figout, 'usim.fig'))
             
             %% Plot simulated productivity.
-            figure(12)
+            figure(11)
             plot(tgrid, sim.Asim)
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$A^{sim}_t$'}, 'Interpreter', 'latex')
@@ -118,7 +118,7 @@ classdef my_graph
             savefig(strcat(figout, 'Asim.fig'))
             
             %% Plot simulated government spending.
-            figure(13)
+            figure(12)
             plot(tgrid, sim.gsim)
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$G^{sim}_t$'}, 'Interpreter', 'latex')

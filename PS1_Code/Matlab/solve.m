@@ -78,11 +78,13 @@ classdef solve
                         end
                         
                         % Choose the best policy.
-                        [vmax, ind] = max(vall);  
+                        [vmax, ind] = max(vall);
+                        
 
                         % Store values.
                         v1(p,j) = vmax;
                         k1(p,j) = kgrid(min(max(ind, 1), klen)); % Keep within bounds
+                        g1(p,j) = g;
                     end
                 end
                 
