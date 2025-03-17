@@ -19,7 +19,7 @@ classdef my_graph
             xlabel({'$k_{t}$'}, 'Interpreter', 'latex')
             ylabel({'$y_{t}$'}, 'Interpreter', 'latex')
             title('Production Function')
-            savefig(strcat(figout, 'ypol.fig'))
+            saveas(gcf, fullfile(figout, 'ypol.png'))
             
             %% Plot capital policy function.
             
@@ -28,7 +28,7 @@ classdef my_graph
             xlabel({'$k_{t}$'}, 'Interpreter', 'latex')
             ylabel({'$k_{t+1}$'}, 'Interpreter', 'latex')
             title('Capital Policy Function')
-            savefig(strcat(figout, 'kpol.fig'))
+            saveas(gcf, fullfile(figout, 'kpol.png'))
             
             %% Plot consumption policy function.
             
@@ -37,7 +37,7 @@ classdef my_graph
             xlabel({'$k_{t}$'}, 'Interpreter', 'latex')
             ylabel({'$c_{t}$'}, 'Interpreter', 'latex')
             title('Consumption Policy Function')
-            savefig(strcat(figout, 'cpol.fig'))
+            saveas(gcf, fullfile(figout, 'cpol.png'))
             
             %% Plot investment policy function.
             
@@ -46,7 +46,7 @@ classdef my_graph
             xlabel({'$k_{t}$'}, 'Interpreter', 'latex')
             ylabel({'$i_{t}$'}, 'Interpreter', 'latex')
             title('Investment Policy Function')
-            savefig(strcat(figout, 'ipol.fig'))
+            saveas(gcf, fullfile(figout, 'ipol.png'))
             
             %% Plot value function.
             
@@ -55,7 +55,7 @@ classdef my_graph
             xlabel({'$k_{t}$'}, 'Interpreter', 'latex')
             ylabel({'$v_t(k_t,A_t)$'}, 'Interpreter', 'latex')
             title('Value Function')
-            savefig(strcat(figout, 'vfun.fig'))
+            saveas(gcf, fullfile(figout, 'vfun.png'))
 
             %% Plot government policy function.
             
@@ -64,7 +64,7 @@ classdef my_graph
             xlabel({'$g_{t}$'}, 'Interpreter', 'latex')
             ylabel({'$g_{t+1}$'}, 'Interpreter', 'latex')
             title('Government Policy Function')
-            savefig(strcat(figout, 'gpol.fig'))
+            saveas(gcf, fullfile(figout, 'gpol.png'))
             
             %% Define time grid.
             tgrid = 1:par.T;
@@ -75,7 +75,7 @@ classdef my_graph
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$y^{sim}_t$'}, 'Interpreter', 'latex')
             title('Simulated Output')
-            savefig(strcat(figout, 'ysim.fig'))
+            saveas(gcf, fullfile(figout, 'ysim.png'))
             
             %% Plot simulated capital choice.
             figure(8)
@@ -83,7 +83,7 @@ classdef my_graph
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$k^{sim}_t$'}, 'Interpreter', 'latex')
             title('Simulated Capital Choice')
-            savefig(strcat(figout, 'ksim.fig'))
+            saveas(gcf, fullfile(figout, 'ksim.png'))
             
             %% Plot simulated consumption.
             figure(9)
@@ -91,7 +91,7 @@ classdef my_graph
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$c^{sim}_t$'}, 'Interpreter', 'latex')
             title('Simulated Consumption')
-            savefig(strcat(figout, 'csim.fig'))
+            saveas(gcf, fullfile(figout, 'csim.png'))
             
             %% Plot simulated investment.
             figure(10)
@@ -99,7 +99,7 @@ classdef my_graph
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$i^{sim}_t$'}, 'Interpreter', 'latex')
             title('Simulated Investment')
-            savefig(strcat(figout, 'isim.fig'))
+            saveas(gcf, fullfile(figout, 'isim.png'))
             
             %% Plot simulated utility.
             figure(11)
@@ -107,7 +107,7 @@ classdef my_graph
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$u^{sim}_t$'}, 'Interpreter', 'latex')
             title('Simulated Utility')
-            savefig(strcat(figout, 'usim.fig'))
+            saveas(gcf, fullfile(figout, 'usim.png'))
             
             %% Plot simulated productivity.
             figure(12)
@@ -115,7 +115,7 @@ classdef my_graph
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$A^{sim}_t$'}, 'Interpreter', 'latex')
             title('Simulated Productivity')
-            savefig(strcat(figout, 'Asim.fig'))
+            saveas(gcf, fullfile(figout, 'Asim.png'))
             
             %% Plot simulated government spending.
             figure(13)
@@ -123,7 +123,7 @@ classdef my_graph
             xlabel({'Time'}, 'Interpreter', 'latex')
             ylabel({'$G^{sim}_t$'}, 'Interpreter', 'latex')
             title('Simulated Government Spending')
-            savefig(strcat(figout, 'Gsim.fig'))
+            saveas(gcf, fullfile(figout, 'Gsim.png'))
             
         end
     end
