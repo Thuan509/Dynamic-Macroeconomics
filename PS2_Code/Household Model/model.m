@@ -24,12 +24,12 @@ classdef model
             par.T = 61; % Last period of life.
             par.tr = 41; % First period of retirement.
             
-            par.beta = 0.96; % Discount factor: Lower values of this mean that consumers are impatient and consume more today.
-            par.sigma = 2.0; % CRRA: Higher values of this mean that consumers are risk averse and do not want to consume too much today.
+            par.beta = 0.94; % Discount factor: Lower values of this mean that consumers are impatient and consume more today.
+            par.gamma= 2.0; % CRRA: Higher values of this mean that consumers are risk averse and do not want to consume too much today.
             
             assert(par.T > par.tr,'Cannot retire after dying.\n')
             assert(par.beta > 0.0 && par.beta < 1.0,'Discount factor should be between 0 and 1.\n')
-            assert(par.sigma > 0.0,'CRRA should be at least 0.\n')
+            assert(par.gamma > 0.0,'CRRA should be at least 0.\n')
 
             %% Prices and Income.
 
@@ -50,7 +50,7 @@ classdef model
 
             par.seed = 2025; % Seed for simulation.
             par.TT = 61; % Number of time periods.
-            par.NN = 1000; % Number of people.
+            par.NN = 3000; % Number of people.
 
         end
         

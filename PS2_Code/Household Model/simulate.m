@@ -46,7 +46,7 @@ classdef simulate
 
             y0_ind = randsample(par.ylen,NN,true,pmat0(1,:))'; % Index for initial income.
             a0_ind = randsample(par.alen,NN,true)'; % Index for initial wealth.
-            t0_ind = randsample(T,NN,true)'; % Index for initial wealth.
+            t0_ind = zeros(NN, 1); % All households start at age 0.
             yr = nan(NN,1); % Retirement income.
 
             for i = 1:NN % Person loop.
