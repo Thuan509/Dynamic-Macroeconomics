@@ -26,6 +26,7 @@ classdef simulate
             NN = par.NN; % People.
             T = par.T; % Life span.
             tr = par.tr; % Retirement.
+            Gmat = par.Gmat; % Age-dependent income process.
 
             kappa = par.kappa; % Share of income as pension.
             ygrid = par.ygrid; % Exogenous income.
@@ -46,7 +47,7 @@ classdef simulate
 
             y0_ind = randsample(par.ylen,NN,true,pmat0(1,:))'; % Index for initial income.
             a0_ind = randsample(par.alen,NN,true)'; % Index for initial wealth.
-            t0_ind = zeros(NN, 1); % All households start at age 0.
+            t0_ind = ones(T,NN)'; % Index for initial wealth.
             yr = nan(NN,1); % Retirement income.
 
             for i = 1:NN % Person loop.
@@ -55,7 +56,7 @@ classdef simulate
                     yr(i) = ygrid(y0_ind(i)); % Store for pension.
                     ysim(1,i) = kappa.*yr(i); % Pension in period 0 given age.
                 else
-                    ysim(1,i) = ygrid(y0_ind(i)); % Pension in period 0 given age.
+                    ysim(1,i) = Gmat(t0_ind(i)).* ygrid(y0_ind(i)); % Pension in period 0 given age.
                 end
 
                 tsim(1,i) = t0_ind(i); % Age in period 0.
@@ -66,7 +67,7 @@ classdef simulate
                     yr(i) = ygrid(y0_ind(i)); % Store as pension for next period
                 elseif t0_ind(i) < tr-1
                     y1_ind = find(rand<=cmat(y0_ind(i),:)); % Draw income shock for next period.
-                    y0_ind(i) = y1_ind(1);
+                    y0_ind(i) =  y1_ind(1);
                 end
 
             end
@@ -85,7 +86,7 @@ classdef simulate
                         if age>=tr % Retired
                             ysim(j,i) = kappa.*yr(i); % Pension in period t given age.
                         else
-                            ysim(j,i) = ygrid(y0_ind(i)); % Pension in period t given age.
+                            ysim(j,i) =  Gmat(y0_ind(i)).*ygrid(y0_ind(i)); % Pension in period t given age.
                         end
 
                         tsim(j,i) = age; % Age in period t.

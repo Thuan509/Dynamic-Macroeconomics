@@ -35,7 +35,8 @@ classdef solve
 
             r = par.r; % Real interest rate.
             kappa = par.kappa; % Share of income as pension.
-            ybar = par.ybar; % Exogenous income.
+
+            Gmat = par.Gmat; % Age-dependent income process
 
             %% Backward induction.
             
@@ -63,7 +64,7 @@ classdef solve
                         if T-age+1 >= tr % Workers get a salary; retirees get a pension proportional to last drawn salary.
                             yt = kappa*ygrid(i);
                         else
-                            yt = ygrid(i);
+                            yt = Gmat(i) * ygrid(i);
                         end
         
                         for p = 1:alen % Loop over the a-states.
