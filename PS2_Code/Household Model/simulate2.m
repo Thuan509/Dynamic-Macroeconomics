@@ -2,7 +2,7 @@
 
 %{
 
-    simulate.m
+    simulate2.m
     ----------
     This code simulates the model.
 
@@ -10,7 +10,7 @@
 
 %% Simulate class.
 
-classdef simulate
+classdef simulate2
     methods(Static)
         %% Simulate the model. 
         
@@ -21,28 +21,30 @@ classdef simulate
 
             apol = sol.a; % Policy function for capital.
             cpol = sol.c; % Policy function for consumption.
+            npol = sol.n; % Policy function for labor.
 
             TT = par.TT; % Time periods.
             NN = par.NN; % People.
             T = par.T; % Life span.
             tr = par.tr; % Retirement.
-            Gmat = par.Gmat; % Age-dependent income process.
 
             kappa = par.kappa; % Share of income as pension.
             ygrid = par.ygrid; % Exogenous income.
             pmat = par.pmat; % Transition matrix.
+            Gmat = par.Gmat; % Matrix for G_t
 
             ysim = nan(TT,NN); % Container for simulated income.
             asim = nan(TT,NN); % Container for simulated savings.
             tsim = nan(TT,NN); % Container for simulated age.
             csim = nan(TT,NN); % Container for simulated consumption.
             usim = nan(TT,NN); % Container for simulated utility.
-            
+            nsim = nan(TT,NN); % Container for simulated labor choice.
+
             %% Begin simulation.
             
             rng(par.seed);
 
-            pmat0 = pmat^100; % Stationary distirbution.
+            pmat0 = pmat^100; % Stationary distribution.
             cmat = cumsum(pmat,2); % CDF matrix.
 
             y0_ind = randsample(par.ylen,NN,true,pmat0(1,:))'; % Index for initial income.
@@ -51,12 +53,15 @@ classdef simulate
             yr = nan(NN,1); % Retirement income.
 
             for i = 1:NN % Person loop.
-                
+                n = npol(a0_ind(i),t0_ind(i),y0_ind(i));
+                nsim(1,i) = npol(a0_ind(i),t0_ind(i),y0_ind(i));
+
                 if t0_ind(i)>=tr % Retired now.
                     yr(i) = ygrid(y0_ind(i)); % Store for pension.
                     ysim(1,i) = kappa.*yr(i); % Pension in period 0 given age.
+                    %n = 0.0;
                 else
-                    ysim(1,i) = Gmat(1).* ygrid(y0_ind(i)); % Pension in period 0 given age.
+                    ysim(1,i) = Gmat(1) * ygrid(y0_ind(i)) * n; % Pension in period 0 given age.
                 end
 
                 tsim(1,i) = t0_ind(i); % Age in period 0.
@@ -67,12 +72,12 @@ classdef simulate
                     yr(i) = ygrid(y0_ind(i)); % Store as pension for next period
                 elseif t0_ind(i) < tr-1
                     y1_ind = find(rand<=cmat(y0_ind(i),:)); % Draw income shock for next period.
-                    y0_ind(i) =  y1_ind(1);
+                    y0_ind(i) = y1_ind(1);
                 end
 
             end
 
-            usim(1,:) = model.utility(csim(1,:),par); % Utility in period 0 given a0.
+            usim(1, :) = model2.utility(csim(1, :), nsim(1,i), par);
 
             %% Simulate endogenous variables.
 
@@ -82,23 +87,27 @@ classdef simulate
                     age = tsim(j-1,i)+1; % Age in period t.
 
                     if age <= T % Check if still alive.
-                        
-                        if age>=tr % Retired
-                            ysim(j,i) = kappa.*yr(i); % Pension in period t given age.
-                        else
-                            ysim(j,i) =  Gmat(age).*ygrid(y0_ind(i)); % Pension in period t given age.
-                        end
-
                         tsim(j,i) = age; % Age in period t.
                         at_ind = find(asim(j-1,i)==agrid); % Savings choice in the previous period is the state today. Find where the latter is on the grid.
+                        n = npol(at_ind,age,y0_ind(i));
+                        nsim(j,i) = npol(at_ind,age,y0_ind(i));
+
+                        if age>=tr % Retired
+                            ysim(j,i) = kappa.*yr(i); % Pension in period t given age.
+                            %n=0.0;
+                        else
+                            ysim(j,i) = Gmat(age)*ygrid(y0_ind(i))*n; % Pension in period t given age.
+                            
+                        end
+
                         csim(j,i) = cpol(at_ind,age,y0_ind(i)); % Consumption in period t.
                         asim(j,i) = apol(at_ind,age,y0_ind(i)); % Savings for period t+1.
-                        usim(j,i) = model.utility(csim(j,i),par); % Utility in period t.
+                        usim(j,i) = model2.utility(csim(j,i),n,par); % Utility in period t.
 
                         if age == tr-1 % Retire next period
                             yr(i) = ygrid(y0_ind(i)); % Store as pension for next period
                         elseif age < tr-1
-                            y1_ind = find(rand<=cmat(y0_ind(i),:)); % Draw income shock for next period.
+                            y1_ind = find(rand<=cmat(y0_ind(i),:),1); % Draw income shock for next period.
                             y0_ind(i) = y1_ind(1);
                         end
 
@@ -113,6 +122,7 @@ classdef simulate
             sim.tsim = tsim; % Simulated age.
             sim.csim = csim; % Simulated consumption.
             sim.usim = usim; % Simulated utility.
+            sim.nsim = nsim; % Simulated labor choice.
              
         end
         

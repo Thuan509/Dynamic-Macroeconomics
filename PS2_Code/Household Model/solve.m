@@ -1,4 +1,4 @@
-%% File Info.
+    %% File Info.
 
 %{
 
@@ -63,8 +63,10 @@ classdef solve
 
                         if T-age+1 >= tr % Workers get a salary; retirees get a pension proportional to last drawn salary.
                             yt = kappa*ygrid(i);
+                            ev = v1(:,T-age+2,i);
                         else
-                            yt = Gmat(i) * ygrid(i);
+                            yt = Gmat(age) * ygrid(i);
+                            ev = squeeze(v1(:,T-age+2,:))*pmat(i,:)';
                         end
         
                         for p = 1:alen % Loop over the a-states.
@@ -74,7 +76,7 @@ classdef solve
                             ct(ct<0.0) = 0.0;
     
                             % Solve the maximization problem.
-                            ev = squeeze(v1(:,T-age+2,:))*pmat(i,:)';
+                            %ev = squeeze(v1(:,T-age+2,:))*pmat(i,:)';
                             vall = model.utility(ct,par) + beta*ev; % Compute the value function for each choice of a', given a.
                             vall(ct<=0.0) = -inf; % Set the value function to negative infinity when c <= 0.
                             [vmax,ind] = max(vall); % Maximize: vmax is the maximized value function; ind is where it is in the grid.

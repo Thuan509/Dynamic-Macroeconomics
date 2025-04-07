@@ -10,11 +10,11 @@
 
 %% Graph class.
 
-classdef my_graph
+classdef my_graph2
     methods(Static)
         %% Plot value and policy functions.
         
-        function [] = plot_policy(par,sol,sim, figout)
+        function [] = plot_policy(par,sol,sim)
             %% Plot consumption policy function.
 
             ystate = par.ygrid;
@@ -27,7 +27,6 @@ classdef my_graph
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$c_{t}$'},'Interpreter','latex') 
             title('Consumption Policy Function, Lowest $a_t$','Interpreter','latex')
-            saveas(gcf, fullfile(figout, 'cpol1_1.png'))
             
             figure(2)
             
@@ -36,7 +35,6 @@ classdef my_graph
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$c_{t}$'},'Interpreter','latex') 
             title('Consumption Policy Function, Highest $a_t$','Interpreter','latex')
-            saveas(gcf, fullfile(figout, 'cpol1_2.png'))
             
             %% Plot saving policy function.
             
@@ -47,7 +45,6 @@ classdef my_graph
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$a_{t+1}$'},'Interpreter','latex') 
             title('Saving Policy Function, Lowest $a_t$','Interpreter','latex')
-            saveas(gcf, fullfile(figout, 'apol1_1.png'))
             
             figure(4)
             
@@ -56,7 +53,24 @@ classdef my_graph
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$a_{t+1}$'},'Interpreter','latex') 
             title('Saving Policy Function, Highest $a_t$','Interpreter','latex')
-            saveas(gcf, fullfile(figout, 'apol1_2.png'))
+
+             %% Plot labor supply choice policy function.
+            
+            figure(5)
+            
+            surf(age(1:5:end),ystate,squeeze(sol.n(1,1:5:end,:))')
+                xlabel({'t'},'Interpreter','latex')
+                ylabel({'$y_{t}$'},'Interpreter','latex') 
+                zlabel({'$n_{t+1}$'},'Interpreter','latex') 
+            title('Saving Policy Function, Lowest $a_t$','Interpreter','latex')
+            
+            figure(4)
+            
+            surf(age(1:5:end),ystate,squeeze(sol.a(end,1:5:end,:))')
+                xlabel({'t'},'Interpreter','latex')
+                ylabel({'$y_{t}$'},'Interpreter','latex') 
+                zlabel({'$a_{t+1}$'},'Interpreter','latex') 
+            title('Saving Policy Function, Highest $a_t$','Interpreter','latex')
             
             %% Plot value function.
             
@@ -67,7 +81,6 @@ classdef my_graph
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$v_t(a_t,t)$'},'Interpreter','latex')
             title('Value Function, Lowest $a_t$','Interpreter','latex')
-            saveas(gcf, fullfile(figout, 'vpol1_1.png'))
 
             figure(6)
             
@@ -76,7 +89,6 @@ classdef my_graph
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$v_t(a_t,t)$'},'Interpreter','latex')
             title('Value Function, Highest $a_t$','Interpreter','latex')
-            saveas(gcf, fullfile(figout, 'vpol1_2.png'))
 
             %% Plot consumption policy function.
 
@@ -96,7 +108,6 @@ classdef my_graph
                 xlabel({'$Age$'},'Interpreter','latex')
                 ylabel({'$c^{sim}_{t}$'},'Interpreter','latex') 
             title('LCP of Consumption')
-            saveas(gcf, fullfile(figout, 'lcp_c1.png'))
             
             %% Plot saving policy function.
             
@@ -106,7 +117,6 @@ classdef my_graph
                 xlabel({'$Age$'},'Interpreter','latex')
                 ylabel({'$a^{sim}_{t+1}$'},'Interpreter','latex') 
             title('LCP of Savings')
-            saveas(gcf, fullfile(figout, 'lcp_a1.png'))
             
             %% Plot value function.
             
@@ -116,7 +126,6 @@ classdef my_graph
                 xlabel({'$Age$'},'Interpreter','latex')
                 ylabel({'$u^{sim}_t$'},'Interpreter','latex') 
             title('LCP of Utility')
-            saveas(gcf, fullfile(figout, 'lcp_u1.png'))
 
         end
         

@@ -1,12 +1,12 @@
 %% File Info.
 %{
-    model.m
+    model2.m
     -------
     This code sets up the model.
 %}
 
 %% Model class.
-classdef model
+classdef model2
     methods(Static)
         %% Set up structure array for model parameters and set the simulation parameters.
         function par = setup()            
@@ -18,11 +18,15 @@ classdef model
             par.tr = 41; % First period of retirement.
             
             par.beta = 0.94; % Discount factor.
-            par.gamma = 2.0; % CRRA risk aversion parameter.
+            par.sigma = 2.0; % CRRA risk aversion parameter.
+            par.gamma = 1.00; % Weight on leisure: Higher values mean that leisure has a higher weight in the utility function.
+            par.nu = 0.5; % Frisch Elasticity: Higher values of this mean that the labor choice becomes more sensitive to productivity shocks
             
             assert(par.T > par.tr, 'Cannot retire after dying.\n');
             assert(par.beta > 0.0 && par.beta < 1.0, 'Discount factor should be between 0 and 1.\n');
             assert(par.gamma > 0.0, 'CRRA should be positive.\n');
+            assert(par.nu > 0,'The sensitivity to productivity shocks should be positive.\n')
+            assert(par.gamma > 0,'The weight on leisure should be at least 0.\n')
 
             %% Prices and Income.
             par.r = 0.03; % Interest rate.
@@ -98,13 +102,22 @@ classdef model
         end
         
         %% Utility function.
-        function u = utility(c, par)
+        function u = utility(c, n, par)
+
+            %% Leisure.
+            un = ((1-n).^(1+(1/par.nu)))./(1+(1/par.nu)); 
+
             %% CRRA utility.
-            if par.gamma == 1
-                u = log(c); % Log utility.
+            if par.sigma == 1
+                
+                uc = log(c); % Log utility of consumption.
             else
-                u = (c.^(1 - par.gamma)) / (1 - par.gamma); % CRRA utility.
+                uc = (c.^(1-par.sigma))./(1-par.sigma); % CRRA utility.
             end
+            
+             % Total.
+            u = uc + par.gamma*un;
+
         end
     end
 end
