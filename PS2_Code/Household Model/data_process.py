@@ -33,10 +33,13 @@ df = muc123a[columns123a].copy()
 muc4a = pd.read_csv(os.path.join(data_path, 'muc4a.csv'))
 
 # Define the required columns (household identifiers + selected variables)
+# m4ac6: working months annually (first),  m4ac7: average days work per month (first), m4ac8: average hours work per day (first)
+# m4ac16: working months annually (secondary),  m4ac17: average days work per month (secondary), m4ac18: average hours work per day (secondary)
+# m4ac21: cash received from secondary job, m4ac22f: other salary 1, m4ac25: other salary 2
 # m4ac11: cash received from main job, m4ac12f: other salary
 # m4ac21: cash received from secondary job, m4ac22f: other salary 1, m4ac25: other salary 2
-columns4a = ['tinh', 'huyen', 'xa', 'diaban', 'hoso', 'matv', 'm4ac11',
-             'm4ac12f', 'm4ac21', 'm4ac22f', 'm4ac25']
+columns4a = ['tinh', 'huyen', 'xa', 'diaban', 'hoso', 'matv', 'm4ac6', 'm4ac7', 'm4ac8', 'm4ac11', 
+             'm4ac12f', 'm4ac16', 'm4ac17', 'm4ac18', 'm4ac21', 'm4ac22f', 'm4ac25']
 muc4a = muc4a[columns4a]
 
 # Create a new column that sums the selected variables for individual's income
