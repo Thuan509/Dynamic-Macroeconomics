@@ -1,20 +1,18 @@
 %% File Info.
 
 %{
-
     simulate1.m
     ----------
-    This code simulates the model.
-
+    This code simulates the model with multiple firms.
 %}
 
 %% Simulate class.
 
 classdef simulate1
     methods(Static)
-        %% Simulate the model. 
+        %% Simulate the model for multiple firms.
         
-        function sim = firm_dynamics(par,sol)            
+        function sim = firm_dynamics(par, sol)            
             %% Set up.
             
             kgrid = par.kgrid; % Capital today (state variable).
@@ -28,13 +26,16 @@ classdef simulate1
             ppol = sol.p; % Optimal profit.
 
             T = par.T; % Time periods.
-            Asim = zeros(T*2,1); % Container for simulated productivity.
-            vsim = zeros(T*2,1); % Container for simulated firm value.
-            rsim = zeros(T*2,1); % Container for simulated output.
-            ksim = zeros(T*2,1); % Container for simulated capital stock.
-            isim = zeros(T*2,1); % Container for simulated investment.
-            esim = zeros(T*2,1); % Container for simulated investment expenditure.
-            psim = zeros(T*2,1); % Container for simulated profit.
+            nlarge = par.nlarge; % Number of firms.
+
+            % Containers for simulated values (each row is a firm, each column is a time step)
+            Asim = zeros(nfirm, T);
+            vsim = zeros(nfirm, T);
+            ksim = zeros(nfirm, T);
+            isim = zeros(nfirm, T);
+            rsim = zeros(nfirm, T);
+            esim = zeros(nfirm, T);
+            psim = zeros(nfirm, T);
             
             %% Begin simulation.
             
@@ -42,49 +43,51 @@ classdef simulate1
 
             pmat0 = par.pmat^1000;
             pmat0 = pmat0(1,:); % Stationary distribution.
-            cmat = cumsum(par.pmat,2); % CDF matrix.
+            cmat = cumsum(par.pmat, 2); % CDF matrix.
 
-            k0_ind = randsample(par.klen,1); % Index for initial capital stock.
-            A0_ind = randsample(par.Alen,1,true,pmat0); % Index for initial productivity.
+            % Initial conditions for all firms
+            k0_ind = randsample(par.klen, nlarge, true); % Random initial capital stock indices
+            A0_ind = randsample(par.Alen, nlarge, true, pmat0); % Random initial productivity indices
 
-            Asim(1) = Agrid(A0_ind); % Productivity in period 1.
-            vsim(1) = vpol(k0_ind,A0_ind); % Firm value in period 1 given k0 and A0.
-            ksim(1) = kpol(k0_ind,A0_ind); % Capital choice for period 2 given k0 and A0.
-            isim(1) = ipol(k0_ind,A0_ind); % Investment in period 1 given k0 and A0.
-            rsim(1) = rpol(k0_ind,A0_ind); % Revenue in period 1 given k0 and A0.
-            esim(1) = ipol(k0_ind,A0_ind); % Investment ependiture in period 1 given k0 and A0.
-            psim(1) = ppol(k0_ind,A0_ind); % Utility in period 1 given k0 and A0.
-
-            A1_ind = find(rand<=cmat(A0_ind,:)); % Draw productivity for next period.
-            A0_ind = A1_ind(1);
+            % Initialize values at t=1
+            for i = 1:nfirm
+                Asim(i, 1) = Agrid(A0_ind(i)); % Initial productivity
+                vsim(i, 1) = vpol(k0_ind(i), A0_ind(i)); % Initial firm value
+                ksim(i, 1) = kpol(k0_ind(i), A0_ind(i)); % Initial capital stock
+                isim(i, 1) = ipol(k0_ind(i), A0_ind(i)); % Initial investment
+                rsim(i, 1) = rpol(k0_ind(i), A0_ind(i)); % Initial revenue
+                esim(i, 1) = epol(k0_ind(i), A0_ind(i)); % Initial investment expenditure
+                psim(i, 1) = ppol(k0_ind(i), A0_ind(i)); % Initial profit
+            end
 
             %% Simulate endogenous and exogenous variables.
 
-            for j = 2:T*2 % Time loop.
-                kt_ind = find(ksim(j-1)==kgrid); % Capital choice in the previous period is the state today. Find where the latter is on the grid.
-                Asim(j) = Agrid(A0_ind); % Productivity in period t.
-                vsim(j) = vpol(kt_ind,A0_ind); % Firm value in period t.
-                ksim(j) = kpol(kt_ind,A0_ind); % Capital stock for period t+1.
-                isim(j) = ipol(kt_ind,A0_ind); % Investment in period t.
-                rsim(j) = rpol(kt_ind,A0_ind); % Revenue in period t.
-                esim(j) = epol(kt_ind,A0_ind); % Investment expenditure in period t.
-                psim(j) = ppol(kt_ind,A0_ind); % Profit in period t.
-                A1_ind = find(rand<=cmat(A0_ind,:)); % Draw next state.
-                A0_ind = A1_ind(1); % State next period.
+            for t = 2:T % Loop over time
+                for i = 1:nfirm % Loop over firms
+                    kt_ind = find(ksim(i, t-1) == kgrid); % Find capital index
+                    Asim(i, t) = Agrid(A0_ind(i)); % Productivity in period t
+                    vsim(i, t) = vpol(kt_ind, A0_ind(i)); % Firm value in period t
+                    ksim(i, t) = kpol(kt_ind, A0_ind(i)); % Capital stock for period t+1
+                    isim(i, t) = ipol(kt_ind, A0_ind(i)); % Investment in period t
+                    rsim(i, t) = rpol(kt_ind, A0_ind(i)); % Revenue in period t
+                    esim(i, t) = epol(kt_ind, A0_ind(i)); % Investment expenditure in period t
+                    psim(i, t) = ppol(kt_ind, A0_ind(i)); % Profit in period t
+
+                    % Draw next state for productivity
+                    A1_ind = find(rand <= cmat(A0_ind(i), :));
+                    A0_ind(i) = A1_ind(1); % Update state for next period
+                end
             end
 
+            %% Store results.
             sim = struct();
-            
-            % Burn the first half.
-            sim.Asim = Asim(T+1:2*T,1); % Simulated productivity.
-            sim.vsim = vsim(T+1:2*T,1); % Simulated output.
-            sim.ksim = ksim(T+1:2*T,1); % Simulated capital choice.
-            sim.isim = isim(T+1:2*T,1); % Simulated investment.
-            sim.rsim = rsim(T+1:2*T,1); % Simulated revenue.
-            sim.esim = esim(T+1:2*T,1); % Simulated investment expenditure.
-            sim.psim = psim(T+1:2*T,1); % Simulated profit.
-             
+            sim.Asim = Asim; % Simulated productivity
+            sim.vsim = vsim; % Simulated firm value
+            sim.ksim = ksim; % Simulated capital choice
+            sim.isim = isim; % Simulated investment
+            sim.rsim = rsim; % Simulated revenue
+            sim.esim = esim; % Simulated investment expenditure
+            sim.psim = psim; % Simulated profit
         end
-        
     end
 end

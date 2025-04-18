@@ -53,13 +53,13 @@ classdef model2
             %% Simulation parameters.
             par.seed = 2025; % Seed for simulation.
             par.TT = 61; % Number of time periods.
-            par.NN = 3000; % Number of people.
+            par.NN = 10; % Number of people.
         end
         
         %% Generate state grids.
         function par = gen_grids(par)
             %% Capital grid.
-            par.alen = 300; % Grid size for a.
+            par.alen = 50; % Grid size for a.
             par.amax = 30.0; % Upper bound for a.
             par.amin = 0.0; % Minimum a.
         

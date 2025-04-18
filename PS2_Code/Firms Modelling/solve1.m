@@ -24,6 +24,10 @@ classdef solve1
             beta = par.beta; % Discount factor.
             delta = par.delta; % Depreciation rate.
 
+            pt = par.t; % Price of investment.
+            wt = par.wt;  % Variable costs.
+            gamma = par.gamma; 
+
             klen = par.klen; % Grid size for k.
             kgrid = par.kgrid; % Grid for k (state and choice).
 
@@ -41,6 +45,7 @@ classdef solve1
             r1 = nan(klen,Alen); % Container for revenue.
             e1 = nan(klen,Alen); % Container for investment expenditure.
             p1 = nan(klen,Alen); % Container for profit.
+            x1 = nan(klen,Alen); % Container input cost. 
 
             crit = 1e-6;
             maxiter = 10000;
@@ -53,19 +58,20 @@ classdef solve1
                 
                 for p = 1:klen % Loop over the K-states.
                     for j = 1:Alen % Loop over the A-states.
+                        for i = 1:xlen
 
                         % Macro variables.
-                        rev = model.production(Agrid(j),kgrid(p),par); % Revenue given A and K.
-                        exp = model.total_cost(kgrid(p),par); % Total investment expenditure given K.
+                        rev = model1.production(Agrid(j),kgrid(p),x, par); % Revenue given A and K.
+                        exp = model1.total_cost(kgrid(p),par); % Total investment expenditure given K.
                         prof = rev-exp; % Profit.
-                        invest = par.kgrid-(1-delta).*kgrid(p); % Investment in new capital.
+                        invest = pt.* (par.kgrid-(1-delta).*kgrid(p)); % Investment in new capital.
 
                         % Solve the maximization problem.
                         ev = v0*pmat(j,:)'; %  The next-period value function is the expected value function over each possible next-period A, conditional on the current state j.
                         vall = prof + beta*ev; % Compute the value function for each choice of K', given K.
                         vall(prof<0) = -inf; % Set the value function to negative infinity when profit < 0.
-                        vall(invest>rev) = -inf; 
-                        vall(invest<0) = -inf; 
+                        vall(invest> rev) = -inf; % Set the value function to negative infinity when profit < 0.
+                         vall(invest<0) = -inf; 
                         [vmax,ind] = max(vall); % Maximize: vmax is the maximized firm value; ind is where it is in the grid.
                     
                         % Store values.
@@ -75,6 +81,7 @@ classdef solve1
                         r1(p,j) = rev; % Total revenue.
                         e1(p,j) = exp(ind); % Total cost.
                         p1(p,j) = prof(ind); % Profits.
+                        x1(p,j) = xt(ind); % Input costs.
 
                     end
                 end
@@ -103,6 +110,7 @@ classdef solve1
             sol.r = r1; % Revenue function.
             sol.e = e1; % Investment expenditure function.
             sol.p = p1; % Profit function.
+            sol.x = x1; % Input cost function.
             
         end
         

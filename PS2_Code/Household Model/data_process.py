@@ -76,16 +76,11 @@ def merge_wealth(df, file_name, columns, value_cols, new_col_name):
 # Merge wealth data from fixed assets (6A)
 # Define the required columns (household identifiers + selected variables)
 # m6ac3: quantity of the assets, m6ac6: assets' value at current price, m6ac7: percentage of ownership
-df = merge_wealth(df, 'muc6a.csv', ['tinh', 'huyen', 'xa', 'diaban', 'hoso', 'm6ac3', 'm6ac6', 'm6ac7'], ['m6ac3', 'm6ac6', 'm6ac7'], 'HH_wealth1')
-
-# Merge wealth data from durable appliances (6B)
-# Define the required columns (household identifiers + selected variables)
-# m6bc3: quantity of the durable appliance, m6bc6: durable appliance value at current price
-df = merge_wealth(df, 'muc6b.csv', ['tinh', 'huyen', 'xa', 'diaban', 'hoso', 'm6bc3', 'm6bc6'], ['m6bc3', 'm6bc6'], 'HH_wealth2')
+df = merge_wealth(df, 'muc6a.csv', ['tinh', 'huyen', 'xa', 'diaban', 'hoso', 'm6ac3', 'm6ac6', 'm6ac7'], ['m6ac3', 'm6ac6', 'm6ac7'], 'HH_wealth')
 
 # Fill missing values with zero and compute total household wealth
-df[['HH_wealth1', 'HH_wealth2']] = df[['HH_wealth1', 'HH_wealth2']].fillna(0)
-df['HH_Wealth'] = df['HH_wealth1'] + df['HH_wealth2']
+df['HH_wealth'] = df['HH_wealth'].fillna(0)
+df['HH_Wealth'] = df['HH_wealth']
 
 # ******************** CALCULATE TOTAL HOUSEHOLD CONSUMPTION (EXPENDITURES) *******************************************
 # Function to process and merge expenditure data
@@ -157,3 +152,4 @@ output_path = r'C:\Users\Do Thu An\OneDrive\Desktop\Dynamic Macroeconomics\Probl
 output_path2 = r'C:\Users\Do Thu An\OneDrive\Desktop\Dynamic Macroeconomics\Problem sets\Dynamic-Macroeconomics\PS2_Code\Household Model\data_processed.csv'
 data.to_csv(output_path2, index=False, encoding='utf-8-sig')
 df.to_csv(output_path, index=False, encoding='utf-8-sig')
+print(df)

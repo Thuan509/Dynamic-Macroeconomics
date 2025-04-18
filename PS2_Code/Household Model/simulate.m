@@ -84,7 +84,7 @@ classdef simulate
                     if age <= T % Check if still alive.
                         
                         if age>=tr % Retired
-                            ysim(j,i) = kappa.*yr(i); % Pension in period t given age.
+                            ysim(j,i) = Gmat(age).*kappa.*yr(i); % Pension in period t given age.
                         else
                             ysim(j,i) =  Gmat(age).*ygrid(y0_ind(i)); % Pension in period t given age.
                         end

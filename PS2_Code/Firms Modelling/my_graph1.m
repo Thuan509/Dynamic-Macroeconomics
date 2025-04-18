@@ -1,12 +1,9 @@
-
 %% File Info.
 
 %{
-
     my_graph1.m
     ----------
     This code plots the value and policy functions and the time path of the variables.
-
 %}
 
 %% Graph class.
@@ -58,7 +55,7 @@ classdef my_graph1
             
             plot(par.kgrid,sol.p)
                 xlabel({'$k_t$'},'Interpreter','latex')
-                ylabel({'$C(k_{t+1},A_t,k_t)+pi_t$'},'Interpreter','latex') 
+                ylabel({'$C(k_{t+1},A_t,k_t)+\pi_t$'},'Interpreter','latex') 
             title('Profit Function','Interpreter','latex')
             
             %% Plot value function.
@@ -70,72 +67,74 @@ classdef my_graph1
                 ylabel({'$v_{t}$'},'Interpreter','latex') 
             title('Value Function','Interpreter','latex')
             
-            %% Plot simulated revenue shocks.
+            %% Compute averages over firms
+            sum_Asim = sum(sim.Asim, 1);
+            sum_ksim = sum(sim.ksim, 1);
+            sum_isim = sum(sim.isim, 1);
+            sum_esim = sum(sim.esim, 1);
+            sum_rsim = sum(sim.rsim, 1);
+            sum_psim = sum(sim.psim, 1);
+            sum_vsim = sum(sim.vsim, 1);
 
-            tgrid = linspace(1,par.T,par.T);
+            %% Time grid.
+            tgrid = 1:par.T;
+
+            %% Plot averaged simulated revenue shocks.
 
             figure(7)
-
-            plot(tgrid,sim.Asim)
+            plot(tgrid, sum_Asim, 'LineWidth', 1.5)
                 xlabel({'Time'},'Interpreter','latex')
-                ylabel({'$A^{sim}_t$'},'Interpreter','latex') 
-            title('Simulated Revenue Shocks')
+                ylabel({'$\bar{A}_t$'},'Interpreter','latex') 
+            title('Average Simulated Revenue Shocks')
 
-            %% Plot simulated capital choice.
+            %% Plot averaged simulated capital choice.
 
             figure(8)
-
-            plot(tgrid,sim.ksim)
+            plot(tgrid, sum_ksim, 'LineWidth', 1.5)
                 xlabel({'Time'},'Interpreter','latex')
-                ylabel({'$k^{sim}_t$'},'Interpreter','latex') 
-            title('Simulated Capital Choice')
+                ylabel({'$\bar{k}_t$'},'Interpreter','latex') 
+            title('Average Simulated Capital Choice')
 
-            %% Plot simulated investment expenditure.
+            %% Plot averaged simulated investment expenditure.
 
             figure(9)
-
-            plot(tgrid,sim.esim)
+            plot(tgrid, sum_esim, 'LineWidth', 1.5)
                 xlabel({'Time'},'Interpreter','latex')
-                ylabel({'$C(k^{sim}_{t+1},A^{sim}_t,k^{sim}_t)+pi^{sim}_t$'},'Interpreter','latex') 
-            title('Simulated Investment Expenditure')
+                ylabel({'$\bar{C}(k_{t+1},A_t,k_t) + \bar{\pi}_t$'},'Interpreter','latex') 
+            title('Average Simulated Investment Expenditure')
 
-            %% Plot simulated investment.
-
-            figure(9)
-
-            plot(tgrid,sim.isim)
-                xlabel({'Time'},'Interpreter','latex')
-                ylabel({'$i^{sim}_t$'},'Interpreter','latex') 
-            title('Simulated Investment')
-
-            %% Plot simulated revenue.
+            %% Plot averaged simulated investment.
 
             figure(10)
-
-            plot(tgrid,sim.rsim)
+            plot(tgrid, sum_isim, 'LineWidth', 1.5)
                 xlabel({'Time'},'Interpreter','latex')
-                ylabel({'$y^{sim}_t$'},'Interpreter','latex') 
-            title('Simulated Revenue')
+                ylabel({'$\bar{i}_t$'},'Interpreter','latex') 
+            title('Average Simulated Investment')
 
-            %% Plot simulated profit.
+            %% Plot averaged simulated revenue.
 
             figure(11)
-
-            plot(tgrid,sim.psim)
+            plot(tgrid, sum_rsim, 'LineWidth', 1.5)
                 xlabel({'Time'},'Interpreter','latex')
-                ylabel({'$\pi^{sim}_t$'},'Interpreter','latex') 
-            title('Simulated Profit')
+                ylabel({'$\bar{y}_t$'},'Interpreter','latex') 
+            title('Average Simulated Revenue')
 
-            %% Plot simulated value function.
+            %% Plot averaged simulated profit.
 
             figure(12)
-
-            plot(tgrid,sim.vsim)
+            plot(tgrid, sum_psim, 'LineWidth', 1.5)
                 xlabel({'Time'},'Interpreter','latex')
-                ylabel({'$v^{sim}_t$'},'Interpreter','latex') 
-            title('Simulated Firm Value')
+                ylabel({'$\bar{\pi}_t$'},'Interpreter','latex') 
+            title('Average Simulated Profit')
+
+            %% Plot averaged simulated value function.
+
+            figure(13)
+            plot(tgrid, sum_vsim, 'LineWidth', 1.5)
+                xlabel({'Time'},'Interpreter','latex')
+                ylabel({'$\bar{v}_t$'},'Interpreter','latex') 
+            title('Average Simulated Firm Value')
 
         end
-        
     end
 end

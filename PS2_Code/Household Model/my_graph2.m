@@ -14,7 +14,7 @@ classdef my_graph2
     methods(Static)
         %% Plot value and policy functions.
         
-        function [] = plot_policy(par,sol,sim)
+        function [] = plot_policy(par,sol,sim, figout)
             %% Plot consumption policy function.
 
             ystate = par.ygrid;
@@ -27,6 +27,7 @@ classdef my_graph2
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$c_{t}$'},'Interpreter','latex') 
             title('Consumption Policy Function, Lowest $a_t$','Interpreter','latex')
+            saveas(gcf, fullfile(figout, 'cpol2_1.png'))
 
             
             figure(2)
@@ -36,6 +37,7 @@ classdef my_graph2
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$c_{t}$'},'Interpreter','latex') 
             title('Consumption Policy Function, Highest $a_t$','Interpreter','latex')
+            saveas(gcf, fullfile(figout, 'cpol2_2.png'))
             
             %% Plot saving policy function.
             
@@ -46,6 +48,8 @@ classdef my_graph2
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$a_{t+1}$'},'Interpreter','latex') 
             title('Saving Policy Function, Lowest $a_t$','Interpreter','latex')
+            saveas(gcf, fullfile(figout, 'apol2_1.png'))
+
             
             figure(4)
             
@@ -54,6 +58,7 @@ classdef my_graph2
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$a_{t+1}$'},'Interpreter','latex') 
             title('Saving Policy Function, Highest $a_t$','Interpreter','latex')
+            saveas(gcf, fullfile(figout, 'apol2_2.png'))
   
 
              %% Plot labor supply choice policy function.
@@ -65,6 +70,7 @@ classdef my_graph2
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$n_{t+1}$'},'Interpreter','latex') 
             title('Labor Supply Choice Policy Function, Lowest $a_t$','Interpreter','latex')
+            saveas(gcf, fullfile(figout, 'npol2_1.png'))
             
             figure(6)
             
@@ -73,6 +79,7 @@ classdef my_graph2
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$n_{t+1}$'},'Interpreter','latex') 
             title('Labor Supply Choice Policy Function, Highest $a_t$','Interpreter','latex')
+            saveas(gcf, fullfile(figout, 'npol2_2.png'))
             
             %% Plot value function.
             
@@ -83,6 +90,7 @@ classdef my_graph2
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$v_t(a_t,t)$'},'Interpreter','latex')
             title('Value Function, Lowest $a_t$','Interpreter','latex')
+            saveas(gcf, fullfile(figout, 'vpol2_1.png'))
 
             figure(8)
             
@@ -91,6 +99,7 @@ classdef my_graph2
                 ylabel({'$y_{t}$'},'Interpreter','latex') 
                 zlabel({'$v_t(a_t,t)$'},'Interpreter','latex')
             title('Value Function, Highest $a_t$','Interpreter','latex')
+            saveas(gcf, fullfile(figout, 'vpol2_2.png'))
 
             %% Plot consumption policy function.
 
@@ -113,6 +122,7 @@ classdef my_graph2
                 xlabel({'$Age$'},'Interpreter','latex')
                 ylabel({'$c^{sim}_{t}$'},'Interpreter','latex') 
             title('LCP of Consumption')
+            saveas(gcf, fullfile(figout, 'lcp_c2.png'))
             
             %% Plot saving policy function.
             
@@ -122,6 +132,7 @@ classdef my_graph2
                 xlabel({'$Age$'},'Interpreter','latex')
                 ylabel({'$a^{sim}_{t+1}$'},'Interpreter','latex') 
             title('LCP of Savings')
+            saveas(gcf, fullfile(figout, 'lcp_a2.png'))
 
             %% Plot labor supply choice policy function.
             
@@ -131,6 +142,7 @@ classdef my_graph2
                 xlabel({'$Age$'},'Interpreter','latex')
                 ylabel({'$n^{sim}_{t+1}$'},'Interpreter','latex') 
             title('LCP of Labor Supply Choice')
+            saveas(gcf, fullfile(figout, 'lcp_n2.png'))
             
             %% Plot value function.
             
@@ -140,6 +152,7 @@ classdef my_graph2
                 xlabel({'$Age$'},'Interpreter','latex')
                 ylabel({'$u^{sim}_t$'},'Interpreter','latex') 
             title('LCP of Utility')
+            saveas(gcf, fullfile(figout, 'lcp_u2.png'))
 
         end
         
