@@ -80,7 +80,7 @@ df = merge_wealth(df, 'muc6a.csv', ['tinh', 'huyen', 'xa', 'diaban', 'hoso', 'm6
 
 # Fill missing values with zero and compute total household wealth
 df['HH_wealth'] = df['HH_wealth'].fillna(0)
-df['HH_Wealth'] = df['HH_wealth']
+df['HH_Wealth'] = df['HH_wealth']#df['HH_wealth'] = df['HH_wealth'].fillna(0)
 
 # ******************** CALCULATE TOTAL HOUSEHOLD CONSUMPTION (EXPENDITURES) *******************************************
 # Function to process and merge expenditure data
@@ -142,7 +142,7 @@ df['HH_consumption_avr'] = df['HH_consumption']/ df['hsize']
 
 # Create another new dataframe with only aggregated household income, consumption and wealth
 data = df[['tinh', 'huyen', 'xa', 'diaban', 'hoso', 'matv', 'hsize', 'm1ac2',
-           'm1ac3', 'm1ac5', 'HH_income', 'HH_consumption', 'HH_consumption_avr', 'HH_Wealth']].copy()
+           'm1ac3', 'm1ac5', 'HH_Income', 'HH_consumption', 'HH_consumption_avr', 'HH_Wealth']].copy()
 
 # Rename 'm1ac5' to 'age'
 data.rename(columns={'m1ac5': 'age'}, inplace=True)

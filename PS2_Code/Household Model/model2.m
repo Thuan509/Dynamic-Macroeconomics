@@ -19,8 +19,8 @@ classdef model2
             
             par.beta = 0.94; % Discount factor.
             par.sigma = 2.0; % CRRA risk aversion parameter.
-            par.gamma = 1.00; % Weight on leisure: Higher values mean that leisure has a higher weight in the utility function.
-            par.nu = 0.5; % Frisch Elasticity: Higher values of this mean that the labor choice becomes more sensitive to productivity shocks
+            par.gamma = 2.00; % Weight on leisure: Higher values mean that leisure has a higher weight in the utility function.
+            par.nu = 1.0; % Frisch Elasticity: Higher values of this mean that the labor choice becomes more sensitive to productivity shocks
             
             assert(par.T > par.tr, 'Cannot retire after dying.\n');
             assert(par.beta > 0.0 && par.beta < 1.0, 'Discount factor should be between 0 and 1.\n');
@@ -40,6 +40,7 @@ classdef model2
             par.Gmat = par.Gt;
             par.Gmat = par.Gmat / par.Gmat(1); % Normalize by first period's value
             par.Gmat = par.Gmat(1:61); % Only take values from 1 to 50 (i.e., )
+            par.Gmat = linspace(1, par.T, par.T);
 
             par.sigma_eps = 0.07; % Std. dev of productivity shocks.
             par.rho = 0.85; % Persistence of AR(1) process.
@@ -60,7 +61,7 @@ classdef model2
         function par = gen_grids(par)
             %% Capital grid.
             par.alen = 50; % Grid size for a.
-            par.amax = 30.0; % Upper bound for a.
+            par.amax = 50.0; % Upper bound for a.
             par.amin = 0.0; % Minimum a.
         
             assert(par.alen > 5, 'Grid size for a should be positive and greater than 5.\n');

@@ -46,9 +46,9 @@ classdef model1
             assert(abs(par.rho) < 1,'The persistence must be less than 1 in absolute value so that the series is stationary.\n')
 
             %% Simulation parameters.
-            par.nfirm = 100; % Panel of 100 firms
+            %par.nfirm = 936; % Panel of 100 firms
             par.seed = 2025; % Seed for simulation.
-            par.T = 300; % Number of time periods.
+            par.T = 1000; % Number of time periods.
             par.nlarge = 936; % Number of large firms.
             %par.nsmall = 1106; % Number of large firms.
 
@@ -79,6 +79,16 @@ classdef model1
             [Agrid,pmat] = model1.tauchen(par.mu,par.rho,par.sigma_eps,par.Alen,par.m); % Tauchen's Method to discretize the AR(1) process for log productivity.
             par.Agrid = exp(Agrid); % The AR(1) is in logs so exponentiate it to get A.
             par.pmat = pmat; % Transition matrix.
+
+            %% Discretized price choice.
+                  
+            par.plen = 7; % Grid size for p.
+            
+            assert(par.plen > 3,'Grid size for p should be positive and greater than 3.\n')
+            
+            [pgrid,mtrix] = model1.tauchen(par.mu,par.rho,par.sigma_eps,par.plen,par.m); % Tauchen's Method to discretize the AR(1) process for log productivity.
+            par.pgrid = exp(pgrid); % The AR(1) is in logs so exponentiate it to get A.
+            par.mtrix = mtrix; % Transition matrix.
         
         end
         
@@ -118,12 +128,12 @@ classdef model1
         
         %% Cost function.
         
-        function cost = total_cost(x,k,par)
+        function cost = total_cost(x,k,p, par)
             %% Convex adjustment cost.
             input_cost = x .* par.wt; % Total input variable cost.
             invest = par.kgrid-(1-par.delta).*k;
             adj_cost = (par.gamma/2).*((invest./k).^2).*k; % Convex adjustment cost.
-            cost = input_cost + adj_cost + par.p*invest; % Total investment cost.
+            cost = input_cost + adj_cost + p*invest; % Total investment cost.
                         
         end
         

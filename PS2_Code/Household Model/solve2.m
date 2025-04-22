@@ -76,9 +76,9 @@ classdef solve2
                                     nt = 0.0;
                                     yt = yt_const;
                                 else
-                                    yfun = @(n) Gmat(T-age+1)*n*ygrid(i);
-                                    cfun = @(n) agrid(p) + Gmat(T-age+1) * ygrid(i) * n - a_prime / (1 + r);
-                                    ufun = @(n) abs(((cfun(n).^(-sigma)) * yfun(n)) - gamma * ((1 - n).^(1 / nu)));  % Maximize utility
+                                    yfun = @(n) (Gmat(T-age+1)*ygrid(i));
+                                    cfun = @(n) (agrid(p) + Gmat(T-age+1) * ygrid(i) * n - a_prime / (1 + r));
+                                    ufun = @(n) (abs(((cfun(n).^(-sigma)) * yfun(n)) - gamma * ((1 - n).^(1 / nu))));  % Maximize utility
                                     [n_opt, ~] = fminbnd(ufun, 0.01, 0.99);
                                     nt = n_opt;  
                                     yt = Gmat(T-age+1) * ygrid(i) * nt;
