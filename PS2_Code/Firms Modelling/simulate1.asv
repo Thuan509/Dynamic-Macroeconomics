@@ -84,7 +84,7 @@ classdef simulate1
                     rsim(i, t) = rpol(kt_ind, A0_ind(i), p0_ind(i)); % Revenue in period t
                     esim(i, t) = epol(kt_ind, A0_ind(i), p0_ind(i)); % Investment expenditure in period t
                     psim(i, t) = ppol(kt_ind, A0_ind(i), p0_ind(i)); % Profit in period t
-                    %xsim(i, t) = xpol(kt_ind, A0_ind(i), p0_ind(i)); % Input in period t
+                    xsim(i, t) = xpol(kt_ind, A0_ind(i), p0_ind(i)); % Input in period t
 
                     % Draw next state for productivity
                     A1_ind = find(rand <= cmat(A0_ind(i), :));
