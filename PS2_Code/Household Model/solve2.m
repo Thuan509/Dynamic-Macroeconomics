@@ -44,6 +44,7 @@ classdef solve2
 
             amat = repmat(agrid, 1, ylen);
             ymat = repmat(ygrid, alen, 1);
+            n_all = zeros(ylen, alen);
 
             fprintf('------------Solving from the Last Period of Life.------------\n\n');
 
@@ -72,9 +73,19 @@ classdef solve2
                             for j = 1:alen
                                 a_prime = agrid(j);
 
-                                if T-age+1 >= tr
+                                if T-age+1 == T
+                                     yfun = @(n) (Gmat(T-age+1)*ygrid(i));
+                                    cfun = @(n) (agrid(p) + Gmat(T-age+1) * ygrid(i) * n - a_prime / (1 + r));
+                                    ufun = @(n) (abs(((cfun(n).^(-sigma)) * yfun(n)) - gamma * ((1 - n).^(1 / nu))));  % Maximize utility
+                                    [n_opt, ~] = fminbnd(ufun, 0.01, 0.99);
+                                    n_all(i, p) = n_opt;
                                     nt = 0.0;
-                                    yt = yt_const;
+                                    yt = yt_const * n_opt;
+
+
+                                elseif T-age+1 >= tr
+                                    yt = yt_const *  n_all(i, p);
+                                    nt = 0.0;
                                 else
                                     yfun = @(n) (Gmat(T-age+1)*ygrid(i));
                                     cfun = @(n) (agrid(p) + Gmat(T-age+1) * ygrid(i) * n - a_prime / (1 + r));
@@ -118,6 +129,7 @@ classdef solve2
             sol.a = a1;
             sol.v = v1;
             sol.n = n1;
+            sol.n_all = n_all;
         end
     end
 end

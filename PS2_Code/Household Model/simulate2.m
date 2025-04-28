@@ -22,6 +22,7 @@ classdef simulate2
             apol = sol.a; % Policy function for capital.
             cpol = sol.c; % Policy function for consumption.
             npol = sol.n; % Policy function for labor.
+            n_all = sol.n_all;
 
             TT = par.TT; % Time periods.
             NN = par.NN; % People.
@@ -59,8 +60,9 @@ classdef simulate2
 
                 
                 if t0_ind(i)>=tr % Retired now.
+                    nt_T = n_all(y0_ind(i), a0_ind(i));
                     yr(i) = ygrid(y0_ind(i)); % Store for pension.
-                    ysim(1,i) = kappa.*yr(i)*Gmat(tr-1); % Pension in period 0 given age.
+                    ysim(1,i) = kappa.*yr(i)*Gmat(tr-1)*nt_T; % Pension in period 0 given age.
                     %n = 0.0;
                 else
                     ysim(1,i) = Gmat(1) * ygrid(y0_ind(i)) * n; % Pension in period 0 given age.
@@ -97,15 +99,14 @@ classdef simulate2
                         nsim(j,i) = npol(at_ind,age,y0_ind(i));
 
                         if age>=tr % Retired
-                            ysim(j,i) = kappa.*yr(i)*Gmat(tr-1); % Pension in period t given age.
+                            nt_T = n_all(y0_ind(i), a0_ind(i));
+                            ysim(j,i) = kappa.*yr(i)*Gmat(tr-1)*nt_T; % Pension in period t given age.
                             %n=0.0;
                         else
                             ysim(j,i) = Gmat(age)*ygrid(y0_ind(i))*n; % Pension in period t given age.
                             
                         end
 
-                        
-                        
                         %[~, at_ind] = min(abs(agrid - asim(j-1,i)));
                         %at_ind = max(1, min(par.alen, at_ind)); % clamp index within [1, alen]
                         csim(j,i) = cpol(at_ind,age,y0_ind(i)); % Consumption in period t.
