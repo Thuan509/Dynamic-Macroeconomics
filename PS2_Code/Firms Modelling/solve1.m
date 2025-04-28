@@ -27,7 +27,6 @@ classdef solve1
             v0 = zeros(klen,Alen,plen);
             v1 = nan(klen,Alen,plen);
             k1 = nan(klen,Alen,plen);
-            i1 = nan(klen,Alen,plen);
             r1 = nan(klen,Alen,plen);
             e1 = nan(klen,Alen,plen);
             p1 = nan(klen,Alen,plen);
@@ -51,7 +50,6 @@ classdef solve1
                             rev = model1.production(Agrid(j), kgrid(p), xt, par); % Revenue
                             exp = model1.total_cost(xt, kgrid(p), pgrid(i), par); % Total cost
                             prof = rev - exp; % Profit
-                            invest = pgrid(i) * (kgrid - (1-delta)*kgrid(p)); % investment vector across choices of k'
 
                             % Expected continuation value
                             ev = zeros(klen,1);
@@ -61,14 +59,12 @@ classdef solve1
 
                             % Bellman choice
                             vall = prof + beta * ev; % profit + discounted expected future value
-                            vall(invest < 0) = -Inf; % Cannot have negative investment
 
                             [vmax, ind] = max(vall); % Find best next period capital
 
                             % Store optimal policies
                             v1(p,j,i) = vmax;
                             k1(p,j,i) = kgrid(ind); % Optimal k'
-                            i1(p,j,i) = invest(ind); % Optimal investment
                             r1(p,j,i) = rev;
                             e1(p,j,i) = exp(ind);
                             p1(p,j,i) = prof(ind);
@@ -92,7 +88,6 @@ classdef solve1
             %% Save output
             sol.v = v1;
             sol.k = k1;
-            sol.i = i1;
             sol.r = r1;
             sol.e = e1;
             sol.p = p1;

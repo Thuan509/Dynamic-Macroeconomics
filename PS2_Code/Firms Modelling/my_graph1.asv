@@ -11,21 +11,26 @@ classdef my_graph1
     methods(Static)
 
         %% 1. Plot and save simulated averages
-        function [] = plot_policy(par, sim, figout)            
-    
+        function [] = plot_policy(par, sim, figout)
+
+            tgrid = linspace(1,par.T,par.T);
+            nlarge = par.nlarge; %
+
+            mean_Asim = 
+
             %% --- Averaged simulated time series ---
+
+            % Compute averages
+            mean_Asim = mean(sim.Asim, 1);
+            mean_ksim = mean(sim.ksim, 1);
+            mean_rsim = mean(sim.rsim, 1);
+            mean_psim = mean(sim.psim, 1);
+            mean_vsim = mean(sim.vsim, 1);
+            mean_ptsim = mean(sim.ptsim, 1);
+            mean_xsim = mean(sim.xsim, 1);
 
             % Time grid
             tgrid = 1:par.T;
-
-            % Compute averages across firms for each time period
-            mean_Asim = mean(sim.Asim, 2);  % Average across firms (dim 2)
-            mean_ksim = mean(sim.ksim, 2);
-            mean_rsim = mean(sim.rsim, 2);
-            mean_psim = mean(sim.psim, 2);
-            mean_vsim = mean(sim.vsim, 2);
-            mean_ptsim = mean(sim.ptsim, 2);
-            mean_xsim = mean(sim.xsim, 2);
 
             %% --- Plot and Save ---
 

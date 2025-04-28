@@ -21,7 +21,6 @@ classdef simulate1
 
             vpol = sol.v; % Firm value.
             kpol = sol.k; % Policy function for capital.
-            ipol = sol.i; % Policy function for investment.
             rpol = sol.r; % Optimal revenue.
             epol = sol.e; % Optimal total investment expenditure.
             ppol = sol.p; % Optimal profit.
@@ -35,7 +34,6 @@ classdef simulate1
             ptsim = zeros(nlarge, T,1);
             vsim = zeros(nlarge, T,1);
             ksim = zeros(nlarge, T,1);
-            isim = zeros(nlarge, T,1);
             rsim = zeros(nlarge, T,1);
             esim = zeros(nlarge, T,1);
             psim = zeros(nlarge, T,1);
@@ -65,7 +63,6 @@ classdef simulate1
                 vsim(i, 1) = vpol(k0_ind(i), A0_ind(i), p0_ind(i)); % Initial firm value
                 ksim(i, 1) = kpol(k0_ind(i), A0_ind(i), p0_ind(i)); % Initial capital stock
                 xsim(i, 1) = xpol(k0_ind(i), A0_ind(i), p0_ind(i)); % Initial profit
-                isim(i, 1) = ipol(k0_ind(i), A0_ind(i), p0_ind(i)); % Initial investment
                 rsim(i, 1) = rpol(k0_ind(i), A0_ind(i), p0_ind(i)); % Initial revenue
                 esim(i, 1) = epol(k0_ind(i), A0_ind(i), p0_ind(i)); % Initial investment expenditure
                 psim(i, 1) = ppol(k0_ind(i), A0_ind(i), p0_ind(i)); % Initial profit
@@ -80,11 +77,10 @@ classdef simulate1
                     ptsim(i, t) = pgrid(A0_ind(i)); % Productivity in period t
                     vsim(i, t) = vpol(kt_ind, A0_ind(i), p0_ind(i)); % Firm value in period t
                     ksim(i, t) = kpol(kt_ind, A0_ind(i), p0_ind(i)); % Capital stock for period t+1
-                    isim(i, t) = ipol(kt_ind, A0_ind(i), p0_ind(i)); % Investment in period t
                     rsim(i, t) = rpol(kt_ind, A0_ind(i), p0_ind(i)); % Revenue in period t
                     esim(i, t) = epol(kt_ind, A0_ind(i), p0_ind(i)); % Investment expenditure in period t
                     psim(i, t) = ppol(kt_ind, A0_ind(i), p0_ind(i)); % Profit in period t
-                    %xsim(i, t) = xpol(kt_ind, A0_ind(i), p0_ind(i)); % Input in period t
+                    xsim(i, t) = xpol(kt_ind, A0_ind(i), p0_ind(i)); % Input in period t
 
                     % Draw next state for productivity
                     A1_ind = find(rand <= cmat(A0_ind(i), :));
@@ -102,7 +98,6 @@ classdef simulate1
             sim.ptsim = ptsim; % Simulated price
             sim.vsim = vsim; % Simulated firm value
             sim.ksim = ksim; % Simulated capital choice
-            sim.isim = isim; % Simulated investment
             sim.rsim = rsim; % Simulated revenue
             sim.esim = esim; % Simulated investment expenditure
             sim.psim = psim; % Simulated profit
