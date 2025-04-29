@@ -11,77 +11,92 @@ classdef my_graph1
     methods(Static)
 
         %% 1. Plot and save simulated averages
-        function [] = plot_policy(par, sim, figout)
-
-            tgrid = linspace(1,par.T,par.T);
-            nlarge = par.nlarge; %
-
-            mean_Asim = 
-
+        function [] = plot_policy(par, sim, figout)            
+    
             %% --- Averaged simulated time series ---
 
-            % Compute averages
-            mean_Asim = mean(sim.Asim, 1);
-            mean_ksim = mean(sim.ksim, 1);
-            mean_rsim = mean(sim.rsim, 1);
-            mean_psim = mean(sim.psim, 1);
-            mean_vsim = mean(sim.vsim, 1);
-            mean_ptsim = mean(sim.ptsim, 1);
-            mean_xsim = mean(sim.xsim, 1);
-
             % Time grid
-            tgrid = 1:par.T;
+            tgrid =  linspace(1,par.T,par.T);
 
+            mean_Asim = nan(par.T, 1);
+            mean_ksim = nan(par.T, 1);
+            mean_rsim = nan(par.T, 1);
+            mean_esim = nan(par.T, 1);
+            mean_psim = nan(par.T, 1);
+            mean_xsim = nan(par.T, 1);
+            mean_ptsim = nan(par.T, 1);
+            mean_vsim = nan(par.T, 1);
+
+            for t = 1:par.T
+                mean_Asim(t) = mean(sim.Asim(:, t), 'omitnan');
+                mean_ksim(t) = mean(sim.ksim(:, t), 'omitnan');
+                mean_rsim(t) = mean(sim.rsim(:, t), 'omitnan');
+                mean_esim(t) = mean(sim.esim(:, t), 'omitnan');
+                mean_psim(t) = mean(sim.psim(:, t), 'omitnan');
+                mean_xsim(t) = mean(sim.xsim(:, t), 'omitnan');
+                mean_ptsim(t) = mean(sim.ptsim(:, t), 'omitnan');
+                mean_vsim(t) = mean(sim.vsim(:, t), 'omitnan');
+            end
+            
             %% --- Plot and Save ---
 
             figure(1)
-            plot(tgrid, mean_Asim, 'LineWidth', 1.5)
+            plot(tgrid, mean_Asim, 'LineWidth', 1.0)
             xlabel({'Time'},'Interpreter','latex')
             ylabel({'$\bar{A}_t$'},'Interpreter','latex') 
             title('Average Simulated Revenue Shocks')
             saveas(gcf, fullfile(figout, 'simulated_mean_Asim.png'));
 
             figure(2)
-            plot(tgrid, mean_ksim, 'LineWidth', 1.5)
+            plot(tgrid, mean_ksim, 'LineWidth', 1.0)
             xlabel({'Time'},'Interpreter','latex')
             ylabel({'$\bar{k}_t$'},'Interpreter','latex') 
             title('Average Simulated Capital Choice')
             saveas(gcf, fullfile(figout, 'simulated_mean_ksim.png'));
 
             figure(3)
-            plot(tgrid, mean_rsim, 'LineWidth', 1.5)
+            plot(tgrid, mean_rsim, 'LineWidth', 0.7)
             xlabel({'Time'},'Interpreter','latex')
             ylabel({'$\bar{y}_t$'},'Interpreter','latex') 
             title('Average Simulated Revenue')
             saveas(gcf, fullfile(figout, 'simulated_mean_rsim.png'));
 
             figure(4)
-            plot(tgrid, mean_psim, 'LineWidth', 1.5)
+            plot(tgrid, mean_psim, 'LineWidth', 0.7)
             xlabel({'Time'},'Interpreter','latex')
             ylabel({'$\bar{\pi}_t$'},'Interpreter','latex') 
             title('Average Simulated Profit')
             saveas(gcf, fullfile(figout, 'simulated_mean_psim.png'));
 
             figure(5)
-            plot(tgrid, mean_vsim, 'LineWidth', 1.5)
+            plot(tgrid, mean_vsim, 'LineWidth', 0.7)
             xlabel({'Time'},'Interpreter','latex')
             ylabel({'$\bar{v}_t$'},'Interpreter','latex') 
             title('Average Simulated Firm Value')
             saveas(gcf, fullfile(figout, 'simulated_mean_vsim.png'));
 
             figure(6)
-            plot(tgrid, mean_ptsim, 'LineWidth', 1.5)
+            plot(tgrid, mean_ptsim, 'LineWidth', 0.7)
             xlabel({'Time'},'Interpreter','latex')
             ylabel({'$\bar{p}_t$'},'Interpreter','latex') 
             title('Average Simulated Price Choice')
             saveas(gcf, fullfile(figout, 'simulated_mean_ptsim.png'));
 
             figure(7)
-            plot(tgrid, mean_xsim, 'LineWidth', 1.5)
+            plot(tgrid, mean_xsim, 'LineWidth', 0.7)
             xlabel({'Time'},'Interpreter','latex')
             ylabel({'$\bar{x}_t$'},'Interpreter','latex') 
             title('Average Simulated Input Cost')
             saveas(gcf, fullfile(figout, 'simulated_mean_xsim.png'));
+
+            %% Plot simulated investment expenditure.
+
+            figure(8)
+
+            plot(tgrid,mean_esim, 'LineWidth', 0.7)
+                xlabel({'Time'},'Interpreter','latex')
+                ylabel({'$C(k^{sim}_{t+1},A^{sim}_t,k^{sim}_t)+pi^{sim}_t$'},'Interpreter','latex') 
+            title('Simulated Investment Expenditure')
         end
 
         %% 2. Plot and save 3D policy function surfaces

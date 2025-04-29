@@ -2,7 +2,7 @@
 %{
     solve3.m
     -------
-    This code solves the model with discrete investment choice.
+    This code solves the model with discrete investment choice and borrowing constraint.
 %}
 
 %% Solve class.
@@ -20,6 +20,7 @@ classdef solve3
             
             beta = par.beta; % Discount factor.
             delta = par.delta; % Depreciation rate.
+            kappa = par.kappa; % Fixed cost parameter (κ)
 
             klen = par.klen; % Grid size for k.
             kgrid = par.kgrid; % Grid for k (state and choice).
@@ -27,6 +28,7 @@ classdef solve3
             Alen = par.Alen; % Grid size for A.
             Agrid = par.Agrid; % Grid for A.
             pmat = par.pmat; % Transition matrix for A.
+            lambda = par.lambda; % Proportion of revenue kept when investing
 
             %% Value Function Iteration.
 
@@ -54,11 +56,15 @@ classdef solve3
 
                         % Compute revenue
                         rev = model2.production(Agrid(j), kgrid(p), par); 
+                        r1(p,j) = rev;  % Store revenue
 
                         % Case 1: No Investment
                         k_no_invest = (1 - delta) * kgrid(p); % Capital next period if no investment.
                         profit_no_invest = rev; % Full revenue, no investment cost.
-                        ev_no_invest = v0 * pmat(j,:)'; % Expected future value.
+                        ev_no_invest = 0;
+                        % Find the index of k_no_invest in kgrid or the closest value
+                        [~, idx] = min(abs(kgrid - k_no_invest));
+                        ev_no_invest = v0(idx,:) * pmat(j,:)'; % Expected future value.
                         value_no_invest = profit_no_invest + beta * ev_no_invest; 
 
                         % Case 2: Invest
@@ -69,11 +75,29 @@ classdef solve3
 
                         for q = 1:klen  % Loop over possible K' choices
                             k_prime = kgrid(q);
-                            exp_invest = model2.total_cost(kgrid(p), par); % Total investment cost
-                            profit_invest = rev - exp_invest; % Profit after cost.
+                            investment = k_prime - (1 - delta) * kgrid(p); % Compute investment amount
+                            
+                            % Skip if investment exceeds borrowing constraint (it ≤ AKα)
+                            if investment > rev
+                                continue;
+                            end
+                            
+                            % Calculate non-convex adjustment cost: C(K',A,K) = κK
+                            cost = kappa * kgrid(p);
+                            
+                            % Total investment cost including the price of investment
+                            if par.p > 0 % If price of investment is specified
+                                exp_invest = cost + par.p * investment;
+                            else
+                                exp_invest = cost;
+                            end
+                            
+                            % Revenue after loss and profit
+                            revenue_after_loss = lambda * rev;
+                            profit_invest = revenue_after_loss - exp_invest;
                             
                             if profit_invest >= 0 % Only consider cases where investment is profitable
-                                ev_invest = v0 * pmat(j,:)'; % Expected future value.
+                                ev_invest = v0(q,:) * pmat(j,:)'; % Expected future value with new capital
                                 temp_value = profit_invest + beta * ev_invest; % Compute total value.
 
                                 % Keep the best investment option
@@ -81,7 +105,7 @@ classdef solve3
                                     value_invest = temp_value;
                                     best_k_prime = k_prime;
                                     best_exp_invest = exp_invest;
-                                    best_invest = best_k_prime - (1 - delta) * kgrid(p); % Compute investment amount.
+                                    best_invest = investment;
                                 end
                             end
                         end
@@ -92,7 +116,7 @@ classdef solve3
                             k1(p,j) = best_k_prime;
                             i1(p,j) = best_invest;
                             e1(p,j) = best_exp_invest;
-                            p1(p,j) = rev - best_exp_invest; % Profit after investment.
+                            p1(p,j) = lambda * rev - best_exp_invest; % Profit after investment with revenue loss
                             invest_decision(p,j) = 1; % Firm chooses to invest
                         else
                             v1(p,j) = value_no_invest; % Choose not to invest
@@ -113,12 +137,12 @@ classdef solve3
                 
                 % Print progress
                 if mod(iter, 25) == 0
-                    fprintf('Iteration: %d.\n', iter)
+                    fprintf('Iteration: %d, Diff: %f\n', iter, diff)
                 end
 
             end
                 
-            fprintf('\nConverged in %d iterations.\n\n', iter)
+            fprintf('\nConverged in %d iterations with diff = %f.\n\n', iter, diff)
             
             fprintf('------------ End of Value Function Iteration ------------\n')
             

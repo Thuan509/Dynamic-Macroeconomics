@@ -67,7 +67,7 @@ classdef my_graph3
             plot(tgrid,sim.ksim)
                 xlabel({'Time'},'Interpreter','latex')
                 ylabel({'$k^{sim}_t$'},'Interpreter','latex') 
-            Title('Simulated Capital Choice')
+            title('Simulated Capital Choice')
 
             %% Plot simulated investment.
             figure(9)
@@ -106,10 +106,12 @@ classdef my_graph3
 
             %% Plot simulated discrete investment decision.
             figure(14)
-            stem(tgrid,sim.inv_sim,'filled','MarkerSize',4)
-                xlabel({'Time'},'Interpreter','latex')
-                ylabel({'Investment Decision (0=No, 1=Yes)'},'Interpreter','latex') 
-            title('Simulated Investment Decision (Discrete Choice)','Interpreter','latex')
+            stem(1:par.T, sol.invest_decision, 'filled')
+            xlabel({'Time'},'Interpreter','latex')
+            ylabel({'Investment Decision'},'Interpreter','latex') 
+            title('Simulated Discrete Investment Choice Over Time','Interpreter','latex')
+            yticks([0 1])
+            yticklabels({'No Invest','Invest'})
 
         end
         

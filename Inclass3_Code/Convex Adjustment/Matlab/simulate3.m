@@ -62,7 +62,7 @@ classdef simulate3
 
             for j = 2:T*2 % Time loop.
                 % Find closest index for ksim(j-1) in the kgrid.
-                kt_ind = find(abs(kgrid - ksim(j-1)) < 1e-10, 1); 
+                [~, kt_ind] = min(abs(kgrid - ksim(j-1)));
                 
                 Asim(j) = Agrid(A0_ind); % Productivity in period t.
                 vsim(j) = vpol(kt_ind,A0_ind); % Firm value in period t.

@@ -109,17 +109,17 @@ classdef model2
         function revenue = production(A, k, par)
             %% Cobb-Douglas production function.
             
-            revenue = par.lambda .*A .* k .^ par.alpha; % Revenue function.
+            revenue = A .* k .^ par.alpha; % Revenue function.
                         
         end
         
         %% Discrete choice total cost function.
         
-        function cost = total_cost( k, par)
+        function cost = total_cost( k, k_prime, par)
             %% Total investment cost with discrete choice.
 
             % Compute investment
-            invest = par.kgrid-(1- par.delta).*k;
+            invest = k_prime-(1- par.delta)*k;
             
             % If investment is positive, apply non-convex cost.
             if invest > 0
