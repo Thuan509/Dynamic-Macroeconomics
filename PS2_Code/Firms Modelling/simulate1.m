@@ -35,7 +35,7 @@ classdef simulate1
             mtrix0 = par.mtrix^1000;
             cmtrix = cumsum(par.mtrix, 2);
 
-            k0_ind = randsample(par.klen, nlarge, true);
+            k0_ind = ones(nlarge, 1); 
             A0_ind = randsample(par.Alen, nlarge, true, pmat0(1,:));
             p0_ind = randsample(par.plen, nlarge, true, mtrix0(1,:));
 

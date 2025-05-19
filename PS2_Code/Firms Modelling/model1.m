@@ -31,8 +31,10 @@ classdef model1
 
             %% Prices, Income, and Costs.
 
-            par.p = 349464654672.21; % Price of investment.
-            par.wt = 16489061776.39; % Variable costs.
+            %par.p = 349464654672.21; % Price of investment.
+            %par.wt = 16489061776.39; % Variable costs.
+            par.p = 100; % Price of investment.
+            par.wt =50; % Price of investment.
             par.gamma = 1.00; % Speed of adjustment; cost function coefficient.
 
             par.sigma_eps = 0.07; % Std. dev of productivity shocks.
@@ -46,7 +48,7 @@ classdef model1
             assert(abs(par.rho) < 1,'The persistence must be less than 1 in absolute value so that the series is stationary.\n')
 
             %% Simulation parameters.
-            %par.nfirm = 936; % Panel of 100 firms
+            par.nfirm = 936; % Panel of 100 firms
             par.seed = 2025; % Seed for simulation.
             par.T = 1000; % Number of time periods.
             par.nlarge = 936; % Number of large firms.

@@ -1,3 +1,13 @@
+%% File Info.
+
+%{
+
+    solve1.m
+    -------
+    This code solve the model.
+
+%}
+
 %% Solve class.
 
 classdef solve1
